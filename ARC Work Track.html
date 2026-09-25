@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARC Work Track(Ratul)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SheetJS for Excel Reading -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #09090b;
+            --bg-surface: #18181b;
+            --bg-surface-hover: #27272a;
+            --text-primary: #fafafe;
+            --text-secondary: #a1a1aa;
+            --accent: #f97316;
+            --accent-hover: #ea580c;
+            --accent-glow: rgba(249, 115, 22, 0.15);
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --success: #22c55e;
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --bonus: #3b82f6;
+            --bonus-bg: rgba(59, 130, 246, 0.1);
+            --border: #3f3f46;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-base); color: var(--text-primary); min-height: 100vh; padding: 3rem 1.5rem; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 2rem; }
+
+        header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+        h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+        h1 span { color: var(--accent); }
+        .date-display { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .stat-card { background: var(--bg-surface); padding: 1.75rem; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0,0,0,0.2); transition: var(--transition); position: relative; }
+        .stat-card:hover { border-color: var(--accent); box-shadow: 0 4px 32px var(--accent-glow); transform: translateY(-2px); }
+        .stat-card.clickable { cursor: pointer; }
+        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .stat-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        
+        /* Sub-stats for Paid Hours inside Stat Card */
+        .stat-subdetails { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; }
+        .stat-subrow { display: flex; justify-content: space-between; align-items: center; }
+        .stat-sublabel { color: var(--text-secondary); font-weight: 500; }
+        .stat-subval-paid { color: var(--success); font-weight: 600; }
+        .stat-subval-unpaid { color: var(--accent); font-weight: 600; }
+
+        .btn-view-est { background: var(--bg-surface-hover); border: 1px solid var(--border); color: var(--text-secondary); font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; }
+        .btn-view-est:hover { color: var(--text-primary); border-color: var(--accent); }
+
+        .input-panel { background: rgba(24, 24, 27, 0.6); backdrop-filter: blur(12px); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+        .input-panel h2 { font-size: 1.125rem; margin-bottom: 1.5rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .batch-hint { font-size: 0.8rem; color: var(--text-secondary); font-weight: 400; }
+        .sync-status { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer; transition: var(--transition);}
+        .sync-status:hover { background: var(--bg-surface-hover); }
+        .sync-offline { color: var(--danger); border-color: var(--danger-bg); background: var(--danger-bg); }
+        .sync-reconnect { color: #eab308; border-color: rgba(234, 179, 8, 0.2); background: rgba(234, 179, 8, 0.1); }
+        .sync-online { color: var(--success); border-color: var(--success-bg); background: var(--success-bg); }
+        
+        .input-grid { display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .input-group label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
+        
+        *:disabled { opacity: 0.4; cursor: not-allowed !important; pointer-events: none; }
+        
+        input, select { width: 100%; background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary); padding: 0.875rem 1rem; border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit; outline: none; transition: var(--transition); }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+        .date-input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
+        .date-input-wrapper svg { position: absolute; right: 12px; color: var(--text-secondary); pointer-events: none; width: 18px; height: 18px; transition: var(--transition); }
+        input[type="date"] { padding-right: 2.5rem; cursor: pointer; }
+        input[type="date"]:focus + svg { color: var(--accent); }
+        .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator, .date-input-wrapper input[type="month"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; right: 0; width: 2.5rem; height: 100%; opacity: 0; cursor: pointer; }
+
+        button { font-family: inherit; cursor: pointer; transition: var(--transition); border-radius: var(--radius-sm); font-weight: 600; border: none; }
+        .btn-submit { background: var(--accent); color: #fff; padding: 0 1.5rem; height: 44px; font-size: 0.95rem; }
+        .btn-submit:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 0 20px var(--accent-glow); }
+        .btn-end-project { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; }
+        .btn-end-project:hover:not(:disabled) { background: var(--danger); color: #fff; }
+        .btn-earning-project { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; margin-right: 0.3rem; }
+        .btn-earning-project:hover:not(:disabled) { background: var(--success); color: #fff; }
+        .btn-bonus-project { background: var(--bonus-bg); color: var(--bonus); border: 1px solid var(--bonus); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; margin-right: 0.3rem; }
+        .btn-bonus-project:hover:not(:disabled) { background: var(--bonus); color: #fff; }
+        .btn-reopen-project { background: var(--bg-surface-hover); color: var(--text-secondary); border: 1px solid var(--border); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; }
+        .btn-reopen-project:hover:not(:disabled) { background: var(--border); color: var(--text-primary); }
+
+        .status-cell-container { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; }
+        .status-wrapper { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        .action-buttons-wrapper { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .end-date-badge { font-size: 0.8rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.05); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+
+        .view-controls { display: flex; gap: 0.5rem; margin-bottom: -1rem; z-index: 5; position: relative; flex-wrap: wrap;}
+        .tab-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.75rem 1.5rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: none; font-size: 0.9rem; margin-bottom: -1px; z-index: 1; }
+        .tab-btn.active { background: var(--bg-surface); color: var(--accent); border-top: 2px solid var(--accent); font-weight: 700; z-index: 3; }
+        .tab-btn:hover:not(.active):not(:disabled) { background: var(--bg-surface-hover); color: var(--text-primary); }
+
+        .filter-bar { background: rgba(9, 9, 11, 0.8); border: 1px solid var(--border); border-bottom: none; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: flex-end; position: relative; z-index: 2; border-radius: 0 var(--radius-lg) 0 0; }
+        .filter-bar .input-group { flex: 1; }
+        .filter-bar input { padding: 0.6rem 1rem; font-size: 0.85rem; height: 38px; }
+        .btn-filter { background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border); height: 38px; padding: 0 1.25rem; }
+        .btn-filter:hover:not(:disabled) { background: var(--text-primary); color: var(--bg-base); }
+        .btn-clear { background: transparent; color: var(--text-secondary); height: 38px; padding: 0 1rem; border: 1px solid transparent; }
+        .btn-clear:hover:not(:disabled) { color: var(--danger); border-color: var(--danger-bg); background: var(--danger-bg); }
+
+        .table-container { background: var(--bg-surface); border-radius: 0 0 var(--radius-lg) var(--radius-lg); border: 1px solid var(--border); overflow: hidden; z-index: 2; position: relative; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(9, 9, 11, 0.5); padding: 1.25rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; border-bottom: 2px solid var(--border); border-top: 1px solid var(--border); }
+        td { padding: 1.25rem 1.5rem; font-size: 0.95rem; border-bottom: 1px solid #27272a; color: var(--text-primary); }
+        .merged-cell { vertical-align: middle; border-right: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid #27272a; }
+        
+        .project-tag { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.4rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-block; cursor: default; }
+        .project-tag.clickable { cursor: pointer; transition: var(--transition); background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+        .project-tag.clickable:hover { background: var(--accent); color: #fff; box-shadow: 0 0 12px var(--accent-glow); }
+        
+        .number-cell { font-variant-numeric: tabular-nums; font-weight: 500; }
+        .total-time-text { color: var(--accent); font-weight: 700; font-size: 1.1rem; }
+        .earning-text { color: var(--success); font-weight: 700; }
+        .action-cell { text-align: center; display: flex; justify-content: center; gap: 0.25rem; }
+        .btn-icon { background: transparent; color: var(--text-secondary); padding: 0.5rem; border-radius: var(--radius-sm); pointer-events: auto;}
+        .btn-icon:hover:not(:disabled) { color: var(--text-primary); background: var(--bg-surface-hover); }
+        .btn-icon.delete:hover:not(:disabled) { color: var(--danger); background: var(--danger-bg); }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+
+        .payment-form-container { padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(9, 9, 11, 0.4); }
+        .payment-form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; width: 90%; max-width: 460px; transform: translateY(30px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
+        .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
+        .modal-header { margin-bottom: 1rem; }
+        .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+        
+        .modal-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; max-height: 55vh; overflow-y: auto; padding-right: 0.5rem; }
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; }
+        
+        .btn-cancel { background: transparent; color: var(--text-primary); border: 1px solid var(--border); padding: 0.6rem 1.2rem; }
+        .btn-cancel:hover:not(:disabled) { background: var(--bg-surface-hover); }
+        .btn-danger { background: var(--danger); color: white; padding: 0.6rem 1.2rem; }
+        
+        .import-export-btn { display: flex; justify-content: center; align-items: center; width: 100%; padding: 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 0.5rem; border: 1px solid var(--border); background: var(--bg-surface-hover); color: var(--text-primary); cursor: pointer; transition: var(--transition); }
+        .import-export-btn:hover { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); transform: translateY(-2px); }
+
+        /* Excel Review Card Styles */
+        .pending-import-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem; position: relative; }
+        .pending-import-card h4 { margin-bottom: 0.75rem; color: var(--text-primary); font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem; }
+        .pending-import-card p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; display: flex; justify-content: space-between; }
+        .pending-import-card .val-before { color: var(--text-secondary); }
+        .pending-import-card .val-after { color: var(--success); font-weight: 600; }
+        .btn-remove-pending { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+        .btn-remove-pending:hover { background: var(--danger); color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>MD Tanvirul Islam <span>Ratul</span></h1>
+        <div class="date-display" id="currentDateDisplay"></div>
+    </header>
+    
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-label">Total Work Hours</div>
+            </div>
+            <div class="stat-value" id="totalHours">0h 0m</div>
+            <div class="stat-subdetails">
+                <div class="stat-subrow">
+                    <span class="stat-sublabel">Paid Hours:</span>
+                    <span class="stat-subval-paid" id="paidHours">0h 0m</span>
+                </div>
+                <div class="stat-subrow">
+                    <span class="stat-sublabel">Unpaid Hours:</span>
+                    <span class="stat-subval-unpaid" id="unpaidHours">0h 0m</span>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card clickable" onclick="triggerDirectTotalEarning(event)" title="Click to manually edit total earning">
+            <div class="stat-header">
+                <div class="stat-label">Total Earning</div>
+                <button class="btn-view-est" onclick="showEstimatedModal(event)">View Estimated</button>
+            </div>
+            <div class="stat-value" style="color: var(--success);" id="directTotalEarnings">₱0.00</div>
+        </div>
+    </div>
+
+    <div class="input-panel">
+        <h2>
+            <span>Log New Session(s)</span>
+            <span id="syncIndicator" class="sync-status sync-offline" onclick="connectLiveSync()" title="Click to connect save path">🔴 Unsaved: Click to Set Save Path</span>
+        </h2>
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Date</label>
+                <div class="date-input-wrapper">
+                    <input type="date" id="dateInput" onclick="this.showPicker()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Project ID(s)</label>
+                <input type="text" id="projectInput" placeholder="e.g. 1234, 6789" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>Work Time(s)</label>
+                <input type="text" id="hoursInput" placeholder="e.g. 2.5, 4.0">
+            </div>
+            <div class="input-group">
+                <label>Map Submit(s)</label>
+                <input type="text" id="mapsInput" placeholder="e.g. 20, 50">
+            </div>
+            <button class="btn-submit" onclick="addEntry()">Submit Log</button>
+        </div>
+    </div>
+
+    <div class="view-controls">
+        <button class="tab-btn active" id="btn-daily" onclick="switchView('daily')">Daily Logs</button>
+        <button class="tab-btn" id="btn-project" onclick="switchView('project')">Project Overview</button>
+        <button class="tab-btn" id="btn-payment" onclick="switchView('payment')">Payment Details</button>
+        
+        <!-- CONNECTION & MENU BUTTONS -->
+        <button class="tab-btn" id="btnConnect" style="margin-left: auto; color: var(--accent); border-color: var(--accent);" onclick="connectLiveSync()">📁 Set Save Path</button>
+        <button class="tab-btn" onclick="showImportModal()">⬆ Import</button>
+        <button class="tab-btn" onclick="showExportModal()">⬇ Export</button>
+
+        <!-- Hidden Inputs for Importing -->
+        <input type="file" id="importJsonInput" style="display: none;" accept=".json,.txt" onchange="importJSON(event)">
+        <input type="file" id="importCsvInput" style="display: none;" accept=".csv" onchange="importCSV(event)">
+        
+        <!-- NEW MULTI-EXCEL UPLOAD -->
+        <input type="file" id="importExcelInput" style="display: none;" accept=".xlsx,.xls" multiple onchange="importProjectExcel(event)">
+    </div>
+
+    <div class="filter-bar" id="filterBarContainer">
+        <div class="input-group">
+            <label>Filter Projects (comma separated)</label>
+            <input type="text" id="filterProjects" placeholder="e.g. PROJ-X, PROJ-Y" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>Start Date</label>
+            <div class="date-input-wrapper">
+                <input type="date" id="filterStartDate" onclick="this.showPicker()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+        </div>
+        <div class="input-group">
+            <label>End Date</label>
+            <div class="date-input-wrapper">
+                <input type="date" id="filterEndDate" onclick="this.showPicker()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+        </div>
+        <button class="btn-filter" onclick="applyFilters()">Apply</button>
+        <button class="btn-clear" onclick="clearFilters()">Clear</button>
+    </div>
+
+    <div class="table-container">
+        <div id="paymentFormArea" style="display: none;" class="payment-form-container">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Add 15-Day Cutoff Payment Entry</h3>
+            <div class="payment-form-grid">
+                <div class="input-group"><label>Month & Year</label><input type="month" id="cutoffMonthInput"></div>
+                <div class="input-group"><label>Cutoff Period</label><select id="cutoffPeriodInput"><option value="1-15">1st - 15th</option><option value="16-end">16th - End of Month</option></select></div>
+                <div class="input-group"><label>Work Hours</label><input type="number" step="0.1" id="cutoffHoursInput" placeholder="e.g. 40" oninput="calculateCutoffTotal()"></div>
+                <div class="input-group"><label>Hourly Rate (₱)</label><input type="number" step="0.01" id="cutoffRateInput" placeholder="e.g. 15.00" oninput="calculateCutoffTotal()"></div>
+                <div class="input-group"><label>Total Payment (₱)</label><input type="number" step="0.01" id="cutoffTotalInput" placeholder="Calculated"></div>
+                <button class="btn-submit" onclick="addCutoffPayment()">Save Cutoff</button>
+            </div>
+        </div>
+        <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="customModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header"><h3 class="modal-title" id="modalTitle">Title</h3></div>
+        <div class="modal-body" id="modalMessage">Message</div>
+        <div class="modal-footer" id="modalActions"></div>
+    </div>
+</div>
+
+<script>
+    let isAppEnabled = false; 
+    let fileHandle = null;
+    let workData = JSON.parse(localStorage.getItem('annotationData')) || [];
+    let endedProjects = JSON.parse(localStorage.getItem('endedProjectsData')) || {};
+    let projectEarnings = JSON.parse(localStorage.getItem('projectEarningsData')) || {};
+    let projectBonuses = JSON.parse(localStorage.getItem('projectBonusesData')) || {};
+    let hourlyRates = JSON.parse(localStorage.getItem('hourlyRatesData')) || {};
+    let cutoffPayments = JSON.parse(localStorage.getItem('cutoffPaymentsData')) || [];
+    let manualTotalEarning = localStorage.getItem('manualTotalEarningData') !== null ? parseFloat(localStorage.getItem('manualTotalEarningData')) : null;
+
+    let currentView = 'daily';
+    let activeFilters = { projects: [], start: '', end: '' };
+    
+    // Memory to hold Excel imports before user confirms
+    let pendingExcelImports = [];
+
+    function toggleApp(enable) {
+        isAppEnabled = enable;
+        const elements = document.querySelectorAll('input, select, button');
+        elements.forEach(el => {
+            if (el.id !== 'btnInitialConnect' && !el.classList.contains('btn-cancel') && !el.classList.contains('btn-remove-pending')) {
+                el.disabled = !enable;
+            }
+        });
+    }
+
+    const dbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open('ARCDashboardDB', 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore('settings');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+
+    async function saveHandleToDB(handle) { const db = await dbPromise; db.transaction('settings', 'readwrite').objectStore('settings').put(handle, 'savedFileHandle'); }
+    async function getHandleFromDB() { const db = await dbPromise; return new Promise((resolve) => { const req = db.transaction('settings', 'readonly').objectStore('settings').get('savedFileHandle'); req.onsuccess = () => resolve(req.result); req.onerror = () => resolve(null); }); }
+    async function verifyFilePermission(handle) { if ((await handle.queryPermission({ mode: 'readwrite' })) === 'granted') return true; if ((await handle.requestPermission({ mode: 'readwrite' })) === 'granted') return true; return false; }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const savedHandle = await getHandleFromDB();
+        if (savedHandle) {
+            fileHandle = savedHandle; toggleApp(false);
+            const lockMessage = `<p>Welcome back! The dashboard remembers your save file: <strong style="color:var(--accent);">${fileHandle.name}</strong></p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">For security, your browser requires you to click the button below to re-grant write access and unlock the dashboard.</p>`;
+            openModal("🔒 Reconnect Save File", lockMessage, "custom");
+            document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">🔗 Reconnect File</button>`;
+            document.getElementById('customModal').onclick = null;
+        } else {
+            toggleApp(false);
+            const lockMessage = `<p>You must set a save location before using the dashboard. This ensures your work is always safely saved to your computer.</p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Click the button below to choose where to save your data file.</p>`;
+            openModal("🔒 Action Required", lockMessage, "custom");
+            document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">📁 Set Save Location</button>`;
+            document.getElementById('customModal').onclick = null; 
+        }
+    });
+
+    async function changeSavePath() { fileHandle = null; connectLiveSync(); }
+
+    async function connectLiveSync() {
+        try {
+            if (fileHandle) {
+                try {
+                    const hasPerm = await verifyFilePermission(fileHandle);
+                    if (!hasPerm) {
+                        fileHandle = null; 
+                    } else {
+                        // Force check if the file still exists on the hard drive
+                        await fileHandle.getFile();
+                    }
+                } catch (e) {
+                    // This catches if the file was deleted manually by the user
+                    fileHandle = null; 
+                }
+            }
+
+            if (!fileHandle) {
+                fileHandle = await window.showSaveFilePicker({ suggestedName: 'ARC_Work_Backup.json', types: [{ description: 'JSON Backup', accept: { 'application/json': ['.json'] } }] });
+                await saveHandleToDB(fileHandle); 
+            }
+            
+            try {
+                const file = await fileHandle.getFile();
+                const contents = await file.text();
+                if (contents.trim() !== "") {
+                    const importedData = JSON.parse(contents);
+                    if (importedData.workData) {
+                        workData = importedData.workData || []; endedProjects = importedData.endedProjects || {}; projectEarnings = importedData.projectEarnings || {}; projectBonuses = importedData.projectBonuses || {}; hourlyRates = importedData.hourlyRates || {}; cutoffPayments = importedData.cutoffPayments || []; manualTotalEarning = importedData.manualTotalEarning !== undefined ? importedData.manualTotalEarning : null;
+                    }
+                }
+            } catch (e) { }
+
+            document.getElementById('syncIndicator').className = "sync-status sync-online"; document.getElementById('syncIndicator').innerHTML = `🟢 Synced to: ${fileHandle.name}`;
+            const btn = document.getElementById('btnConnect'); btn.innerHTML = `📁 Change Save Path`; btn.onclick = changeSavePath; 
+            
+            toggleApp(true); 
+            document.getElementById('customModal').onclick = function(e) { if (e.target === this) closeModal(); };
+            
+            saveAllData(); renderUI();
+            
+            document.getElementById('modalActions').innerHTML = `<button class="btn-submit" onclick="closeModal()">Got it!</button>`;
+            openModal("Sync Active", `Dashboard unlocked! Data is now actively saving to <strong>${fileHandle.name}</strong>.`, "alert");
+
+        } catch (err) {
+            fileHandle = null; // Ensure the loop is broken if they cancel
+            if (!isAppEnabled) {
+                const lockMessage = `<p style="color: var(--danger);">You must set a save location to use the dashboard.</p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Click below to try again.</p>`;
+                openModal("🔒 Action Required", lockMessage, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">📁 Try Again</button>`;
+            }
+        }
+    }
+
+    async function saveAllData() {
+        if (!isAppEnabled) return; 
+        
+        localStorage.setItem('annotationData', JSON.stringify(workData)); localStorage.setItem('endedProjectsData', JSON.stringify(endedProjects)); localStorage.setItem('projectEarningsData', JSON.stringify(projectEarnings)); localStorage.setItem('projectBonusesData', JSON.stringify(projectBonuses)); localStorage.setItem('hourlyRatesData', JSON.stringify(hourlyRates)); localStorage.setItem('cutoffPaymentsData', JSON.stringify(cutoffPayments));
+        if (manualTotalEarning !== null) localStorage.setItem('manualTotalEarningData', manualTotalEarning); else localStorage.removeItem('manualTotalEarningData');
+
+        if (fileHandle) {
+            try {
+                const fullBackup = { workData, endedProjects, projectEarnings, projectBonuses, hourlyRates, cutoffPayments, manualTotalEarning };
+                const writable = await fileHandle.createWritable();
+                await writable.write(JSON.stringify(fullBackup, null, 2));
+                await writable.close();
+            } catch (err) {
+                document.getElementById('syncIndicator').className = "sync-status sync-offline"; document.getElementById('syncIndicator').innerHTML = "🔴 Connection Lost";
+                const btn = document.getElementById('btnConnect'); btn.innerHTML = `🔗 Reconnect Save File`; btn.onclick = connectLiveSync;
+                
+                toggleApp(false); 
+                const lockMessage = `<p style="color: var(--danger);">The connection to your backup file was lost!</p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">The file may have been moved or deleted. Please reconnect to resume working.</p>`;
+                openModal("🔒 Connection Lost", lockMessage, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">🔗 Reconnect File</button>`; document.getElementById('customModal').onclick = null;
+                fileHandle = null;
+            }
+        }
+    }
+
+    function showExportModal() {
+        const content = `
+            <p style="margin-bottom: 1rem;">How would you like to export your data?</p>
+            <button class="import-export-btn" onclick="exportJSON()">📦 Export Full Backup (.json)</button>
+            <button class="import-export-btn" onclick="exportCSV()">📊 Export Daily Logs (.csv / Excel)</button>
+        `;
+        openModal("Export Data", content, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-cancel" onclick="closeModal()">Close</button>`;
+    }
+
+    function showImportModal() {
+        const content = `
+            <p style="margin-bottom: 1rem; color: var(--danger);">Warning: Importing a Backup or CSV will overwrite current logs.</p>
+            <button class="import-export-btn" onclick="document.getElementById('importJsonInput').click(); closeModal();">📦 Import Full Backup (.json / .txt)</button>
+            <button class="import-export-btn" onclick="document.getElementById('importCsvInput').click(); closeModal();">📊 Import Daily Logs (.csv / Excel)</button>
+            <button class="import-export-btn" style="border-color: var(--success); color: var(--success);" onclick="document.getElementById('importExcelInput').click(); closeModal();">📈 Import Project Payments (.xlsx)</button>
+        `;
+        openModal("Import Data", content, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button>`;
+    }
+
+    // --- NEW EXCEL STAGING & REVIEW ENGINE ---
+    async function importProjectExcel(event) {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        pendingExcelImports = []; // Reset staging array
+
+        const processFile = (file) => {
+            return new Promise((resolve) => {
+                let projectId = file.name.replace(/[^0-9]/g, '');
+                if(!projectId) projectId = file.name.split('.')[0].toUpperCase();
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(worksheet);
+
+                        if(json.length > 0) {
+                            const row = json.find(r => r.owner_name && r.owner_name.includes('Ratul')) || json[0];
+                            
+                            if(row) {
+                                pendingExcelImports.push({
+                                    id: Date.now() + Math.random().toString(36).substr(2, 9), // Unique ID for deletion
+                                    fileName: file.name,
+                                    projectId: projectId,
+                                    personalPayment: parseFloat(row.payment_personal) || 0,
+                                    bonus: parseFloat(row.newbie_compensation) || 0,
+                                    rate: parseFloat(row.hourly_rate) || 0
+                                });
+                            }
+                        }
+                    } catch(err) {
+                        console.error("Error processing Excel file", file.name, err);
+                    }
+                    resolve();
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        };
+
+        for (let i = 0; i < files.length; i++) {
+            await processFile(files[i]);
+        }
+
+        event.target.value = ''; // Reset input so you can select the same files again if needed
+        
+        if (pendingExcelImports.length > 0) {
+            renderImportConfirmation();
+        } else {
+            openModal("Import Failed", "Could not find valid Ratul data in the selected Excel files.", "alert");
+        }
+    }
+
+    function renderImportConfirmation() {
+        if (pendingExcelImports.length === 0) {
+            closeModal();
+            return;
+        }
+
+        let html = `<p style="margin-bottom: 1rem; color: var(--text-secondary);">Please review the payments detected below. Click 'Update' to merge them into your dashboard.</p>`;
+        
+        pendingExcelImports.forEach(item => {
+            const curEarn = projectEarnings[item.projectId] || 0;
+            const newEarn = curEarn + item.personalPayment;
+            
+            const curBon = projectBonuses[item.projectId] || 0;
+            const newBon = curBon + item.bonus;
+            
+            const curRate = hourlyRates[item.projectId] || 0;
+            const newRate = item.rate > 0 ? item.rate : curRate; // Replaces rate, does not add
+
+            html += `
+            <div class="pending-import-card">
+                <h4>
+                    Project ${item.projectId}
+                    <button class="btn-remove-pending" onclick="removePendingImport('${item.id}')" title="Discard this file">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </h4>
+                <p><span>Earnings:</span> <span><span class="val-before">₱${curEarn.toFixed(2)}</span> ➔ <span class="val-after">+₱${item.personalPayment.toFixed(2)} = ₱${newEarn.toFixed(2)}</span></span></p>
+                <p><span>Bonus:</span> <span><span class="val-before">₱${curBon.toFixed(2)}</span> ➔ <span class="val-after">+₱${item.bonus.toFixed(2)} = ₱${newBon.toFixed(2)}</span></span></p>
+                <p><span>Hourly Rate:</span> <span><span class="val-before">₱${curRate.toFixed(2)}/hr</span> ➔ <span class="val-after">₱${newRate.toFixed(2)}/hr</span></span></p>
+                <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: left; opacity: 0.7;">Extracted from: ${item.fileName}</div>
+            </div>`;
+        });
+
+        openModal("Review Project Payments", html, "custom");
+        
+        document.getElementById('modalActions').innerHTML = `
+            <button class="btn-cancel" onclick="pendingExcelImports = []; closeModal();">Cancel</button>
+            <button class="btn-submit" onclick="confirmExcelImport()">Update Dashboard</button>
+        `;
+    }
+
+    function removePendingImport(id) {
+        pendingExcelImports = pendingExcelImports.filter(item => item.id !== id);
+        renderImportConfirmation(); // Re-render the popup instantly
+    }
+
+    function confirmExcelImport() {
+        let processedCount = pendingExcelImports.length;
+        
+        // Loop through the accepted staging items and apply them to the master data
+        pendingExcelImports.forEach(item => {
+            projectEarnings[item.projectId] = (projectEarnings[item.projectId] || 0) + item.personalPayment;
+            projectBonuses[item.projectId] = (projectBonuses[item.projectId] || 0) + item.bonus;
+            if (item.rate > 0) hourlyRates[item.projectId] = item.rate;
+        });
+        
+        pendingExcelImports = []; // Clear staging
+        saveAllData(); 
+        renderUI();
+        
+        openModal("Import Successful", `Successfully merged ${processedCount} project file(s) into your dashboard balances!`, "alert");
+    }
+
+    function exportJSON() { const fullBackup = { workData, endedProjects, projectEarnings, projectBonuses, hourlyRates, cutoffPayments, manualTotalEarning }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(fullBackup, null, 2)], { type: "application/json" })); a.download = "ARC_Work_Track_Full_Backup.json"; document.body.appendChild(a); a.click(); document.body.removeChild(a); closeModal(); }
+    function exportCSV() { if (workData.length === 0) return openModal("Export Failed", "There is no log data to export.", "alert"); let csvContent = "Date,Project ID,Work Hours,Maps Submitted\n"; workData.forEach(row => csvContent += `${row.date},${row.project},${row.hours},${row.maps}\n`); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csvContent], { type: "text/csv;charset=utf-8;" })); a.download = "ARC_Work_Logs.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a); closeModal(); }
+    function importJSON(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const importedData = JSON.parse(e.target.result); workData = importedData.workData || []; endedProjects = importedData.endedProjects || {}; projectEarnings = importedData.projectEarnings || {}; projectBonuses = importedData.projectBonuses || {}; hourlyRates = importedData.hourlyRates || {}; cutoffPayments = importedData.cutoffPayments || []; manualTotalEarning = importedData.manualTotalEarning !== undefined ? importedData.manualTotalEarning : null; saveAllData(); renderUI(); openModal("Import Successful", "Backup data loaded perfectly.", "alert"); } catch (err) { openModal("Import Failed", "Invalid JSON or TXT format.", "alert"); } event.target.value = ''; }; reader.readAsText(file); }
+    function importCSV(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const rows = e.target.result.split('\n'); let newLogs = []; for (let i = 1; i < rows.length; i++) { if (!rows[i].trim()) continue; const cols = rows[i].split(','); if (cols.length >= 4) { newLogs.push({ date: cols[0].trim(), project: cols[1].trim(), hours: parseFloat(cols[2]), maps: parseInt(cols[3], 10) }); } } if (newLogs.length > 0) { workData = newLogs; saveAllData(); renderUI(); openModal("Import Successful", `Successfully imported ${newLogs.length} logs from Excel.`, "alert"); } else { openModal("Import Failed", "Could not find valid log data in the CSV.", "alert"); } event.target.value = ''; }; reader.readAsText(file); }
+
+    function updateRealTimeClock() { const now = new Date(); document.getElementById('currentDateDisplay').innerText = `${now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | ${now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`; }
+    setInterval(updateRealTimeClock, 1000); updateRealTimeClock(); document.getElementById('dateInput').valueAsDate = new Date(); document.getElementById('cutoffMonthInput').value = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
+
+    function formatHoursMinutes(decimalHours) { const totalMinutes = Math.round(decimalHours * 60); const hours = Math.floor(totalMinutes / 60); const minutes = totalMinutes % 60; if (hours === 0 && minutes === 0) return '0h 0m'; if (hours === 0) return `${minutes}m`; if (minutes === 0) return `${hours}h`; return `${hours}h ${minutes}m`; }
+    function calculateCutoffTotal() { const h = parseFloat(document.getElementById('cutoffHoursInput').value) || 0; const r = parseFloat(document.getElementById('cutoffRateInput').value) || 0; if (h > 0 && r > 0) document.getElementById('cutoffTotalInput').value = (h * r).toFixed(2); }
+
+    function addCutoffPayment() { const monthVal = document.getElementById('cutoffMonthInput').value; const periodVal = document.getElementById('cutoffPeriodInput').value; const hoursVal = parseFloat(document.getElementById('cutoffHoursInput').value); const rateVal = parseFloat(document.getElementById('cutoffRateInput').value); const totalVal = parseFloat(document.getElementById('cutoffTotalInput').value); if (!monthVal || isNaN(totalVal)) return openModal("Missing Information", "Please enter valid month and payment values.", "alert"); cutoffPayments.push({ id: Date.now(), month: monthVal, period: periodVal, hours: isNaN(hoursVal) ? 0 : hoursVal, rate: isNaN(rateVal) ? 0 : rateVal, total: totalVal }); document.getElementById('cutoffHoursInput').value = ''; document.getElementById('cutoffRateInput').value = ''; document.getElementById('cutoffTotalInput').value = ''; saveAllData(); renderUI(); }
+    function deleteCutoffPayment(id) { openModal("Delete Cutoff Payment", "Remove this payment entry?", "confirm", () => { cutoffPayments = cutoffPayments.filter(p => p.id !== id); saveAllData(); renderUI(); }); }
+    function triggerDirectTotalEarning(e) { if (e && e.target.classList.contains('btn-view-est')) return; const currentVal = getCalculatedTotalEarning(); const editForm = document.createElement('div'); editForm.innerHTML = `<p style="margin-bottom: 1rem;">Directly set or adjust your overall <strong>Total Earning</strong> (₱):</p><div class="input-group"><label>Total Earning Amount (₱)</label><input type="number" step="0.01" id="directEarningInput" value="${currentVal.toFixed(2)}"></div>`; openModal("Set Total Earning", editForm, "edit", () => { const val = parseFloat(document.getElementById('directEarningInput').value); if (isNaN(val) || val < 0) return openModal("Invalid Amount", "Please enter a valid amount.", "alert"); manualTotalEarning = val; saveAllData(); renderUI(); }); }
+    function getCalculatedTotalEarning() { if (manualTotalEarning !== null) return manualTotalEarning; return cutoffPayments.reduce((sum, item) => sum + Math.max(0, item.total - 100), 0); }
+    function computeEstimatedEarnings() { let totalEarningsSum = 0, totalBonusSum = 0; [...new Set(workData.map(r => r.project))].forEach(proj => { const projHours = workData.filter(r => r.project === proj).reduce((s, r) => s + r.hours, 0); const rate = hourlyRates[proj]; if (projectEarnings[proj] !== undefined) totalEarningsSum += projectEarnings[proj]; else if (rate !== undefined) totalEarningsSum += projHours * rate; if (projectBonuses[proj] !== undefined) totalBonusSum += projectBonuses[proj]; }); return { estimated: totalEarningsSum, bonus: totalBonusSum, total: totalEarningsSum + totalBonusSum }; }
+    function showEstimatedModal(e) { if (e) e.stopPropagation(); const data = computeEstimatedEarnings(); openModal("Estimated Earnings", `<div style="font-size: 1rem; font-weight: 500; color: var(--success); margin-bottom: 0.5rem;">Estimated Base: ₱${data.estimated.toFixed(2)}</div><div style="font-size: 1rem; font-weight: 500; color: var(--bonus); margin-bottom: 0.75rem;">Total Bonuses: ₱${data.bonus.toFixed(2)}</div><div style="font-size: 1.15rem; font-weight: 700; color: var(--accent); border-top: 1px solid var(--border); padding-top: 0.75rem;">Total: ₱${data.total.toFixed(2)}</div>`, "alert"); }
+    function openModal(title, message, type = 'alert', confirmCallback = null) { document.getElementById('modalTitle').innerText = title; if (typeof message === 'string') document.getElementById('modalMessage').innerHTML = message; else { document.getElementById('modalMessage').innerHTML = ''; document.getElementById('modalMessage').appendChild(message); } const actions = document.getElementById('modalActions'); if (type === 'alert') actions.innerHTML = `<button class="btn-submit" onclick="closeModal()">Got it</button>`; else if (type === 'confirm') { window.executeModalAction = () => { if(confirmCallback) confirmCallback(); closeModal(); }; actions.innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button> <button class="btn-danger" onclick="executeModalAction()">Confirm</button>`; } else if (type === 'edit') { window.executeModalAction = () => { if(confirmCallback) confirmCallback(); closeModal(); }; actions.innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button> <button class="btn-submit" style="height: auto; padding: 0.6rem 1.2rem;" onclick="executeModalAction()">Save</button>`; } document.getElementById('customModal').classList.add('active'); }
+    function closeModal() { document.getElementById('customModal').classList.remove('active'); }
+
+    function addEntry() { const dateVal = document.getElementById('dateInput').value; const projectRaw = document.getElementById('projectInput').value; const hoursRaw = document.getElementById('hoursInput').value; const mapsRaw = document.getElementById('mapsInput').value; if (!dateVal || !projectRaw || !hoursRaw || !mapsRaw) return openModal("Missing Information", "Please complete all fields.", "alert"); const projects = projectRaw.split(',').map(p => p.trim().toUpperCase()); const hours = hoursRaw.split(',').map(h => parseFloat(h.trim())); const maps = mapsRaw.split(',').map(m => parseInt(m.trim(), 10)); if (projects.length !== hours.length || projects.length !== maps.length) return openModal("Mismatch", "Lists must have the same length.", "alert"); if (hours.some(isNaN) || maps.some(isNaN)) return openModal("Invalid", "Numbers only for time/maps.", "alert"); const closedProjects = projects.filter(p => endedProjects[p] && endedProjects[p].isEnded); if (closedProjects.length > 0) return openModal("Ended", `Cannot log for closed projects: ${closedProjects.join(', ')}`, "alert"); for (let i = 0; i < projects.length; i++) workData.push({ date: dateVal, project: projects[i], hours: hours[i], maps: maps[i] }); document.getElementById('projectInput').value = ''; document.getElementById('hoursInput').value = ''; document.getElementById('mapsInput').value = ''; document.getElementById('projectInput').focus(); saveAllData(); renderUI(); }
+    function triggerEditDailyTotal(dateStr, currentTotalHours) { const editForm = document.createElement('div'); editForm.innerHTML = `<div class="input-group"><label>Daily Total (Hrs)</label><input type="number" step="0.1" id="editDailyTotalInput" value="${currentTotalHours.toFixed(2)}"></div>`; openModal("Edit Daily Total", editForm, "edit", () => { const newTotal = parseFloat(document.getElementById('editDailyTotalInput').value); if (isNaN(newTotal) || newTotal < 0) return; const entries = workData.filter(item => item.date === dateStr); const oldTotal = entries.reduce((sum, e) => sum + e.hours, 0); if (oldTotal === 0) { const splitTime = newTotal / entries.length; entries.forEach(e => e.hours = splitTime); } else { const ratio = newTotal / oldTotal; entries.forEach(e => e.hours = Math.round((e.hours * ratio) * 100) / 100); } saveAllData(); renderUI(); }); }
+    function triggerEdit(originalIndex) { const item = workData[originalIndex]; const editForm = document.createElement('div'); editForm.innerHTML = `<div class="input-group"><label>Date</label><input type="date" id="editDateInput" value="${item.date}"></div><div class="input-group"><label>ID</label><input type="text" id="editProjectInput" value="${item.project}"></div><div class="input-group"><label>Hrs</label><input type="number" step="0.1" id="editHoursInput" value="${item.hours}"></div><div class="input-group"><label>Maps</label><input type="number" id="editMapsInput" value="${item.maps}"></div>`; openModal("Edit", editForm, "edit", () => { workData[originalIndex] = { date: document.getElementById('editDateInput').value, project: document.getElementById('editProjectInput').value.trim().toUpperCase(), hours: parseFloat(document.getElementById('editHoursInput').value), maps: parseInt(document.getElementById('editMapsInput').value, 10) }; saveAllData(); renderUI(); }); }
+    function triggerDelete(originalIndex) { openModal("Delete", "Remove entry?", "confirm", () => { workData.splice(originalIndex, 1); saveAllData(); renderUI(); }); }
+    function triggerEndProject(projectName) { const endForm = document.createElement('div'); endForm.innerHTML = `<div class="input-group"><label>End Date</label><input type="date" id="endDateInput" value="${new Date().toISOString().split('T')[0]}"></div>`; openModal(`End ${projectName}`, endForm, "edit", () => { endedProjects[projectName] = { isEnded: true, endDate: document.getElementById('endDateInput').value }; saveAllData(); renderUI(); }); }
+    function triggerHourlyRate(projectName) { const rateForm = document.createElement('div'); rateForm.innerHTML = `<div class="input-group"><label>Rate (₱)</label><input type="number" step="0.01" id="hourlyRateInput" value="${hourlyRates[projectName] || ''}"></div>`; openModal(`Rate: ${projectName}`, rateForm, "edit", () => { hourlyRates[projectName] = parseFloat(document.getElementById('hourlyRateInput').value); saveAllData(); renderUI(); }); }
+    function triggerAddEarning(projectName) { const earnForm = document.createElement('div'); earnForm.innerHTML = `<div class="input-group"><label>Earning (₱)</label><input type="number" step="0.01" id="projectEarningInput" value="${projectEarnings[projectName] || 0}"></div>`; openModal(`Earn: ${projectName}`, earnForm, "edit", () => { projectEarnings[projectName] = parseFloat(document.getElementById('projectEarningInput').value); saveAllData(); renderUI(); }); }
+    function triggerAddBonus(projectName) { const bonusForm = document.createElement('div'); bonusForm.innerHTML = `<div class="input-group"><label>Bonus (₱)</label><input type="number" step="0.01" id="projectBonusInput" value="${projectBonuses[projectName] || 0}"></div>`; openModal(`Bonus: ${projectName}`, bonusForm, "edit", () => { projectBonuses[projectName] = parseFloat(document.getElementById('projectBonusInput').value); saveAllData(); renderUI(); }); }
+    function triggerReopenProject(projectName) { openModal("Reopen", `Reopen ${projectName}?`, "confirm", () => { delete endedProjects[projectName]; saveAllData(); renderUI(); }); }
+
+    function switchView(viewName) { currentView = viewName; document.getElementById('btn-daily').classList.toggle('active', viewName === 'daily'); document.getElementById('btn-project').classList.toggle('active', viewName === 'project'); document.getElementById('btn-payment').classList.toggle('active', viewName === 'payment'); document.getElementById('filterBarContainer').style.display = (viewName === 'payment') ? 'none' : 'flex'; document.getElementById('paymentFormArea').style.display = (viewName === 'payment') ? 'block' : 'none'; renderUI(); }
+    function applyFilters() { activeFilters.projects = document.getElementById('filterProjects').value ? document.getElementById('filterProjects').value.split(',').map(p => p.trim().toUpperCase()).filter(p => p) : []; activeFilters.start = document.getElementById('filterStartDate').value; activeFilters.end = document.getElementById('filterEndDate').value; renderUI(); }
+    function clearFilters() { document.getElementById('filterProjects').value = ''; document.getElementById('filterStartDate').value = ''; document.getElementById('filterEndDate').value = ''; activeFilters = { projects: [], start: '', end: '' }; renderUI(); }
+
+    function renderUI() {
+        const thead = document.getElementById('tableHead'); const tbody = document.getElementById('tableBody'); tbody.innerHTML = ''; let totalHoursSum = 0; document.getElementById('directTotalEarnings').innerText = '₱' + getCalculatedTotalEarning().toFixed(2);
+
+        // Calculate Paid & Unpaid Hours
+        const allLoggedHours = workData.reduce((sum, item) => sum + item.hours, 0);
+        const totalPaidHours = cutoffPayments.reduce((sum, p) => sum + (p.hours || 0), 0);
+        const unpaidHours = Math.max(0, allLoggedHours - totalPaidHours);
+
+        document.getElementById('paidHours').innerText = formatHoursMinutes(totalPaidHours);
+        document.getElementById('unpaidHours').innerText = formatHoursMinutes(unpaidHours);
+
+        if (currentView === 'payment') {
+            thead.innerHTML = `<tr><th>Month/Year</th><th>Cutoff Period</th><th>Work Hours</th><th>Hourly Rate</th><th>Total Payment</th><th style="width: 80px; text-align: center;">Action</th></tr>`;
+            if (cutoffPayments.length === 0) tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">No payment cutoffs added yet.</div></td></tr>`;
+            else { cutoffPayments.sort((a,b) => b.month.localeCompare(a.month)).forEach(item => { const periodText = item.period === '1-15' ? '1st - 15th' : '16th - End of Month'; const formattedMonth = new Date(item.month + '-01').toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); tbody.innerHTML += `<tr><td><strong>${formattedMonth}</strong></td><td>${periodText}</td><td class="number-cell">${item.hours ? item.hours.toFixed(1) + ' hrs' : '-'}</td><td class="number-cell">${item.rate ? '₱' + item.rate.toFixed(2) + '/hr' : '-'}</td><td class="number-cell earning-text">₱${item.total.toFixed(2)}</td><td class="action-cell"><button class="btn-icon delete" onclick="deleteCutoffPayment(${item.id})" title="Delete"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`; }); }
+            document.getElementById('totalHours').innerText = formatHoursMinutes(allLoggedHours); return;
+        }
+
+        let displayData = workData.filter(row => { return (activeFilters.projects.length === 0 || activeFilters.projects.includes(row.project)) && (!activeFilters.start || row.date >= activeFilters.start) && (!activeFilters.end || row.date <= activeFilters.end); });
+
+        if (displayData.length === 0) { thead.innerHTML = `<tr><th>Logs</th></tr>`; tbody.innerHTML = `<tr><td><div class="empty-state">No sessions found.</div></td></tr>`; document.getElementById('totalHours').innerText = '0h 0m'; return; }
+
+        if (currentView === 'daily') {
+            thead.innerHTML = `<tr><th>Date</th><th>Project ID</th><th>Project Time</th><th>Project Maps</th><th>Daily Total Time</th><th style="width: 100px; text-align: center;">Action</th></tr>`;
+            [...new Set(displayData.map(item => item.date))].sort((a, b) => new Date(b) - new Date(a)).forEach(dateStr => {
+                const dailyEntries = displayData.filter(item => item.date === dateStr); const totalDailyHours = dailyEntries.reduce((sum, entry) => sum + entry.hours, 0); const formattedDate = new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                dailyEntries.forEach((row, index) => {
+                    totalHoursSum += row.hours; const originalIndex = workData.indexOf(row); let tr = '<tr>';
+                    if (index === 0) tr += `<td rowspan="${dailyEntries.length}" class="merged-cell">${formattedDate}</td>`;
+                    
+                    // Hover Tooltip logic for daily view
+                    const rate = hourlyRates[row.project];
+                    const rateStr = rate !== undefined ? `₱${rate.toFixed(2)}/hr` : "Not Set";
+                    tr += `<td><span class="project-tag" title="Hourly Rate: ${rateStr}">${row.project}</span></td><td class="number-cell">${formatHoursMinutes(row.hours)}</td><td class="number-cell">${row.maps}</td>`;
+                    
+                    if (index === 0) tr += `<td rowspan="${dailyEntries.length}" class="merged-cell number-cell total-time-text" style="cursor: pointer;" onclick="triggerEditDailyTotal('${dateStr}', ${totalDailyHours})">${formatHoursMinutes(totalDailyHours)}</td>`;
+                    tr += `<td class="action-cell"><button class="btn-icon" onclick="triggerEdit(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button><button class="btn-icon delete" onclick="triggerDelete(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`;
+                    tbody.innerHTML += tr;
+                });
+            });
+        } else if (currentView === 'project') {
+            thead.innerHTML = `<tr><th>Project ID</th><th>Start Date</th><th>Total Maps</th><th>Total Hours</th><th>Estimated Earning</th><th>Status</th></tr>`;
+            const projectSummary = {};
+            displayData.forEach(row => { totalHoursSum += row.hours; if (!projectSummary[row.project]) projectSummary[row.project] = { project: row.project, maps: 0, hours: 0, sessions: 0, startDate: row.date, latestDate: row.date }; projectSummary[row.project].maps += row.maps; projectSummary[row.project].hours += row.hours; projectSummary[row.project].sessions += 1; if (row.date < projectSummary[row.project].startDate) projectSummary[row.project].startDate = row.date; if (row.date > projectSummary[row.project].latestDate) projectSummary[row.project].latestDate = row.date; });
+            
+            Object.values(projectSummary).sort((a, b) => new Date(b.latestDate) - new Date(a.latestDate)).forEach(proj => {
+                const isEnded = endedProjects[proj.project]?.isEnded; const formattedStartDate = new Date(proj.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                const rate = hourlyRates[proj.project]; let projEarning = projectEarnings[proj.project] !== undefined ? projectEarnings[proj.project] : (rate !== undefined ? proj.hours * rate : 0); const projBonus = projectBonuses[proj.project] || 0; const earningVal = `₱${projEarning.toFixed(2)}${projBonus > 0 ? ` <span style="font-size: 0.8rem; color: var(--bonus); font-weight: 500;">(+ ₱${projBonus.toFixed(2)} bonus)</span>` : ''}`;
+                
+                // Hover Tooltip logic for project view
+                const rateStr = rate !== undefined ? `₱${rate.toFixed(2)}/hr` : "Not Set";
+                let projectTagHtml = isEnded ? `<span class="project-tag clickable" onclick="triggerHourlyRate('${proj.project}')" title="Hourly Rate: ${rateStr} (Click to Edit)">${proj.project}</span>` : `<span class="project-tag" title="Hourly Rate: ${rateStr}">${proj.project}</span>`;
+                
+                let statusHtml = isEnded ? `<div class="status-cell-container"><div class="status-wrapper"><span style="color: var(--danger); font-size: 0.85rem; font-weight: 600;">Ended</span><span class="end-date-badge">End: ${new Date(endedProjects[proj.project].endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span></div><div class="action-buttons-wrapper"><button class="btn-earning-project" onclick="triggerAddEarning('${proj.project}')">Add Earning</button><button class="btn-bonus-project" onclick="triggerAddBonus('${proj.project}')">Bonus (₱)</button><button class="btn-reopen-project" onclick="triggerReopenProject('${proj.project}')">Reopen Project</button></div></div>` : `<div class="status-cell-container"><span style="color: #22c55e; font-size: 0.85rem; font-weight: 600;">Active</span><div class="action-buttons-wrapper"><button class="btn-end-project" onclick="triggerEndProject('${proj.project}')">End Project</button></div></div>`;
+                
+                tbody.innerHTML += `<tr><td>${projectTagHtml}</td><td style="font-size: 0.85rem; color: var(--text-secondary);">${formattedStartDate}</td><td class="number-cell" style="font-weight: 700;">${proj.maps}</td><td class="number-cell total-time-text">${formatHoursMinutes(proj.hours)}</td><td class="number-cell earning-text">${earningVal}</td><td>${statusHtml}</td></tr>`;
+            });
+        }
+        document.getElementById('totalHours').innerText = formatHoursMinutes(totalHoursSum);
+    }
+</script>
+</body>
+</html>
