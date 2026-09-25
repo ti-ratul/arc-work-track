@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARC Work Track(Ratul)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ARC Work Track (Ratul)</title>
     <!-- SVG Favicon for browser tab -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2309090b'/><path d='M30 75 L50 25 L70 75 M38 58 L62 58' stroke='%23f97316' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='72' cy='28' r='7' fill='%2322c55e'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,145 +41,151 @@
             --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-base); color: var(--text-primary); min-height: 100vh; padding: 3rem 1.5rem; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 2rem; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-base); color: var(--text-primary); min-height: 100vh; padding: 1.5rem 1rem; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 1.5rem; }
 
-        header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
-        h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+        header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 1rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
+        h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
         h1 span { color: var(--accent); }
-        .date-display { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; }
+        .date-display { color: var(--text-secondary); font-size: 0.8rem; font-weight: 500; }
         
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-        .stat-card { background: var(--bg-surface); padding: 1.75rem; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0,0,0,0.2); transition: var(--transition); position: relative; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+        .stat-card { background: var(--bg-surface); padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0,0,0,0.2); transition: var(--transition); position: relative; }
         .stat-card:hover { border-color: var(--accent); box-shadow: 0 4px 32px var(--accent-glow); transform: translateY(-2px); }
         .stat-card.clickable { cursor: pointer; }
-        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-        .stat-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
-        .stat-value { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+        .stat-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 2.2rem; font-weight: 700; line-height: 1; }
         
-        /* Sub-stats for Paid Hours inside Stat Card */
-        .stat-subdetails { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; }
+        .stat-subdetails { margin-top: 0.85rem; padding-top: 0.6rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; }
         .stat-subrow { display: flex; justify-content: space-between; align-items: center; }
         .stat-sublabel { color: var(--text-secondary); font-weight: 500; }
         .stat-subval-paid { color: var(--success); font-weight: 600; }
         .stat-subval-unpaid { color: var(--accent); font-weight: 600; }
 
-        .btn-view-est { background: var(--bg-surface-hover); border: 1px solid var(--border); color: var(--text-secondary); font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; }
+        .btn-view-est { background: var(--bg-surface-hover); border: 1px solid var(--border); color: var(--text-secondary); font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; }
         .btn-view-est:hover { color: var(--text-primary); border-color: var(--accent); }
 
-        .input-panel { background: rgba(24, 24, 27, 0.6); backdrop-filter: blur(12px); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border); }
-        .input-panel h2 { font-size: 1.125rem; margin-bottom: 1.5rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        .input-panel { background: rgba(24, 24, 27, 0.7); backdrop-filter: blur(12px); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+        .input-panel h2 { font-size: 1.05rem; margin-bottom: 1.25rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
         .sync-status-group { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-        .sync-status { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer; transition: var(--transition);}
+        .sync-status { font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.7rem; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer; transition: var(--transition);}
         .sync-status:hover { background: var(--bg-surface-hover); }
         .sync-offline { color: var(--danger); border-color: var(--danger-bg); background: var(--danger-bg); }
         .sync-reconnect { color: #eab308; border-color: rgba(234, 179, 8, 0.2); background: rgba(234, 179, 8, 0.1); }
         .sync-online { color: var(--success); border-color: var(--success-bg); background: var(--success-bg); }
         .sync-firebase { color: #ffca28; border-color: rgba(255, 202, 40, 0.2); background: rgba(255, 202, 40, 0.1); }
         
-        .input-grid { display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr auto; gap: 1rem; align-items: end; }
-        .input-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
-        .input-group label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr auto; gap: 0.85rem; align-items: end; }
+        .input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .input-group label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; }
         
         *:disabled { opacity: 0.4; cursor: not-allowed !important; pointer-events: none; }
         
-        input, select, textarea { width: 100%; background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary); padding: 0.875rem 1rem; border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit; outline: none; transition: var(--transition); }
-        textarea { resize: vertical; min-height: 90px; font-family: monospace; font-size: 0.82rem; }
+        input, select, textarea { width: 100%; background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary); padding: 0.75rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit; outline: none; transition: var(--transition); }
+        textarea { resize: vertical; min-height: 80px; font-family: monospace; font-size: 0.8rem; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
         .date-input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-        .date-input-wrapper svg { position: absolute; right: 12px; color: var(--text-secondary); pointer-events: none; width: 18px; height: 18px; transition: var(--transition); }
-        input[type="date"] { padding-right: 2.5rem; cursor: pointer; }
+        .date-input-wrapper svg { position: absolute; right: 10px; color: var(--text-secondary); pointer-events: none; width: 16px; height: 16px; transition: var(--transition); }
+        input[type="date"] { padding-right: 2.2rem; cursor: pointer; }
         input[type="date"]:focus + svg { color: var(--accent); }
         .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator, .date-input-wrapper input[type="month"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; right: 0; width: 2.5rem; height: 100%; opacity: 0; cursor: pointer; }
 
         button { font-family: inherit; cursor: pointer; transition: var(--transition); border-radius: var(--radius-sm); font-weight: 600; border: none; }
-        .btn-submit { background: var(--accent); color: #fff; padding: 0 1.5rem; height: 44px; font-size: 0.95rem; }
+        .btn-submit { background: var(--accent); color: #fff; padding: 0 1.25rem; height: 42px; font-size: 0.9rem; width: 100%; }
         .btn-submit:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 0 20px var(--accent-glow); }
-        .btn-end-project { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; }
+        .btn-end-project { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); padding: 0.3rem 0.6rem; font-size: 0.7rem; border-radius: var(--radius-sm); margin-top: 0.3rem; display: inline-block; }
         .btn-end-project:hover:not(:disabled) { background: var(--danger); color: #fff; }
-        .btn-earning-project { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; margin-right: 0.3rem; }
+        .btn-earning-project { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); padding: 0.3rem 0.6rem; font-size: 0.7rem; border-radius: var(--radius-sm); margin-top: 0.3rem; display: inline-block; margin-right: 0.25rem; }
         .btn-earning-project:hover:not(:disabled) { background: var(--success); color: #fff; }
-        .btn-bonus-project { background: var(--bonus-bg); color: var(--bonus); border: 1px solid var(--bonus); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; margin-right: 0.3rem; }
+        .btn-bonus-project { background: var(--bonus-bg); color: var(--bonus); border: 1px solid var(--bonus); padding: 0.3rem 0.6rem; font-size: 0.7rem; border-radius: var(--radius-sm); margin-top: 0.3rem; display: inline-block; margin-right: 0.25rem; }
         .btn-bonus-project:hover:not(:disabled) { background: var(--bonus); color: #fff; }
-        .btn-reopen-project { background: var(--bg-surface-hover); color: var(--text-secondary); border: 1px solid var(--border); padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.4rem; display: inline-block; }
+        .btn-reopen-project { background: var(--bg-surface-hover); color: var(--text-secondary); border: 1px solid var(--border); padding: 0.3rem 0.6rem; font-size: 0.7rem; border-radius: var(--radius-sm); margin-top: 0.3rem; display: inline-block; }
         .btn-reopen-project:hover:not(:disabled) { background: var(--border); color: var(--text-primary); }
 
         .status-cell-container { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; }
-        .status-wrapper { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-        .action-buttons-wrapper { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-        .end-date-badge { font-size: 0.8rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.05); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+        .status-wrapper { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+        .action-buttons-wrapper { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .end-date-badge { font-size: 0.75rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.05); padding: 0.15rem 0.4rem; border-radius: var(--radius-sm); border: 1px solid var(--border); }
 
-        .view-controls { display: flex; gap: 0.5rem; margin-bottom: -1rem; z-index: 5; position: relative; flex-wrap: wrap;}
-        .tab-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.75rem 1.25rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: none; font-size: 0.85rem; margin-bottom: -1px; z-index: 1; }
+        .view-controls { display: flex; gap: 0.4rem; margin-bottom: -1rem; z-index: 5; position: relative; flex-wrap: wrap; overflow-x: auto; padding-bottom: 2px; }
+        .view-controls::-webkit-scrollbar { display: none; }
+        .tab-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.65rem 1rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: none; font-size: 0.8rem; margin-bottom: -1px; z-index: 1; white-space: nowrap; }
         .tab-btn.active { background: var(--bg-surface); color: var(--accent); border-top: 2px solid var(--accent); font-weight: 700; z-index: 3; }
         .tab-btn:hover:not(.active):not(:disabled) { background: var(--bg-surface-hover); color: var(--text-primary); }
 
-        .filter-bar { background: rgba(9, 9, 11, 0.8); border: 1px solid var(--border); border-bottom: none; padding: 1.25rem 1.5rem; display: flex; gap: 1rem; align-items: flex-end; position: relative; z-index: 2; border-radius: 0 var(--radius-lg) 0 0; }
-        .filter-bar .input-group { flex: 1; }
-        .filter-bar input { padding: 0.6rem 1rem; font-size: 0.85rem; height: 38px; }
-        .btn-filter { background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border); height: 38px; padding: 0 1.25rem; }
+        .filter-bar { background: rgba(9, 9, 11, 0.85); border: 1px solid var(--border); border-bottom: none; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-end; position: relative; z-index: 2; border-radius: 0 var(--radius-lg) 0 0; flex-wrap: wrap; }
+        .filter-bar .input-group { flex: 1; min-width: 140px; }
+        .filter-bar input { padding: 0.55rem 0.85rem; font-size: 0.8rem; height: 38px; }
+        .btn-filter { background: var(--bg-surface-hover); color: var(--text-primary); border: 1px solid var(--border); height: 38px; padding: 0 1rem; font-size: 0.8rem; }
         .btn-filter:hover:not(:disabled) { background: var(--text-primary); color: var(--bg-base); }
-        .btn-clear { background: transparent; color: var(--text-secondary); height: 38px; padding: 0 1rem; border: 1px solid transparent; }
+        .btn-clear { background: transparent; color: var(--text-secondary); height: 38px; padding: 0 0.75rem; border: 1px solid transparent; font-size: 0.8rem; }
         .btn-clear:hover:not(:disabled) { color: var(--danger); border-color: var(--danger-bg); background: var(--danger-bg); }
 
         .table-container { background: var(--bg-surface); border-radius: 0 0 var(--radius-lg) var(--radius-lg); border: 1px solid var(--border); overflow: hidden; z-index: 2; position: relative; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: rgba(9, 9, 11, 0.5); padding: 1.25rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; border-bottom: 2px solid var(--border); border-top: 1px solid var(--border); }
-        td { padding: 1.25rem 1.5rem; font-size: 0.95rem; border-bottom: 1px solid #27272a; color: var(--text-primary); }
-        .merged-cell { vertical-align: middle; border-right: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid #27272a; }
+        th { background: rgba(9, 9, 11, 0.6); padding: 1rem; font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; border-bottom: 2px solid var(--border); border-top: 1px solid var(--border); white-space: nowrap; }
+        td { padding: 1rem; font-size: 0.85rem; border-bottom: 1px solid #27272a; color: var(--text-primary); }
+        .merged-cell { vertical-align: middle; border-right: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); }
         
-        .project-tag { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.4rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-block; cursor: default; }
+        .project-tag { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.3rem 0.6rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500; display: inline-block; cursor: default; }
         .project-tag.clickable { cursor: pointer; transition: var(--transition); background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
         .project-tag.clickable:hover { background: var(--accent); color: #fff; box-shadow: 0 0 12px var(--accent-glow); }
         
         .number-cell { font-variant-numeric: tabular-nums; font-weight: 500; }
-        .total-time-text { color: var(--accent); font-weight: 700; font-size: 1.1rem; }
+        .total-time-text { color: var(--accent); font-weight: 700; font-size: 1rem; }
         .earning-text { color: var(--success); font-weight: 700; }
-        .action-cell { text-align: center; display: flex; justify-content: center; gap: 0.25rem; }
-        .btn-icon { background: transparent; color: var(--text-secondary); padding: 0.5rem; border-radius: var(--radius-sm); pointer-events: auto;}
+        .action-cell { text-align: center; display: flex; justify-content: center; gap: 0.2rem; }
+        .btn-icon { background: transparent; color: var(--text-secondary); padding: 0.4rem; border-radius: var(--radius-sm); pointer-events: auto;}
         .btn-icon:hover:not(:disabled) { color: var(--text-primary); background: var(--bg-surface-hover); }
         .btn-icon.delete:hover:not(:disabled) { color: var(--danger); background: var(--danger-bg); }
-        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+        .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--text-secondary); font-size: 0.9rem; }
 
-        .payment-form-container { padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(9, 9, 11, 0.4); }
-        .payment-form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+        .payment-form-container { padding: 1.25rem; border-bottom: 1px solid var(--border); background: rgba(9, 9, 11, 0.4); }
+        .payment-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) auto; gap: 0.85rem; align-items: end; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 1rem; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; width: 90%; max-width: 520px; transform: translateY(30px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
+        .modal-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; width: 100%; max-width: 480px; transform: translateY(30px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.5); max-height: 90vh; display: flex; flex-direction: column; }
         .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
-        .modal-header { margin-bottom: 1rem; }
-        .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+        .modal-header { margin-bottom: 0.85rem; }
+        .modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); }
         
-        .modal-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; max-height: 60vh; overflow-y: auto; padding-right: 0.5rem; }
-        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.25rem; overflow-y: auto; padding-right: 0.25rem; }
+        .modal-body::-webkit-scrollbar { width: 5px; }
         .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         
-        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; }
         
-        .btn-cancel { background: transparent; color: var(--text-primary); border: 1px solid var(--border); padding: 0.6rem 1.2rem; }
+        .btn-cancel { background: transparent; color: var(--text-primary); border: 1px solid var(--border); padding: 0.55rem 1rem; font-size: 0.85rem; }
         .btn-cancel:hover:not(:disabled) { background: var(--bg-surface-hover); }
-        .btn-danger { background: var(--danger); color: white; padding: 0.6rem 1.2rem; }
+        .btn-danger { background: var(--danger); color: white; padding: 0.55rem 1rem; font-size: 0.85rem; }
         
-        .import-export-btn { display: flex; justify-content: center; align-items: center; width: 100%; padding: 0.85rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 0.5rem; border: 1px solid var(--border); background: var(--bg-surface-hover); color: var(--text-primary); cursor: pointer; transition: var(--transition); }
-        .import-export-btn:hover { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); transform: translateY(-2px); }
+        .import-export-btn { display: flex; justify-content: center; align-items: center; width: 100%; padding: 0.75rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 0.5rem; border: 1px solid var(--border); background: var(--bg-surface-hover); color: var(--text-primary); cursor: pointer; transition: var(--transition); font-size: 0.85rem; }
+        .import-export-btn:hover { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); transform: translateY(-1px); }
 
-        .pending-import-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem; position: relative; }
-        .pending-import-card h4 { margin-bottom: 0.75rem; color: var(--text-primary); font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem; }
-        .pending-import-card p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; display: flex; justify-content: space-between; }
+        .pending-import-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 0.85rem; border-radius: var(--radius-sm); margin-bottom: 0.6rem; position: relative; }
+        .pending-import-card h4 { margin-bottom: 0.6rem; color: var(--text-primary); font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.4rem; }
+        .pending-import-card p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; display: flex; justify-content: space-between; }
         .pending-import-card .val-before { color: var(--text-secondary); }
         .pending-import-card .val-after { color: var(--success); font-weight: 600; }
-        .btn-remove-pending { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+        .btn-remove-pending { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
         .btn-remove-pending:hover { background: var(--danger); color: #fff; }
 
-        .badge-info { font-size: 0.75rem; background: var(--accent-glow); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 12px; border: 1px solid var(--accent); }
+        .fab-button { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); border: 2px solid var(--accent); box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4); display: flex; align-items: center; justify-content: center; z-index: 99; cursor: pointer; transition: var(--transition); overflow: hidden; padding: 0; }
+        .fab-button:hover { background: var(--accent-hover); transform: scale(1.08) translateY(-2px); box-shadow: 0 10px 24px rgba(249, 115, 22, 0.6); }
+        .fab-button img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Floating Action Button (FAB) */
-        .fab-button { position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #ffffff; border: none; box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4); display: flex; align-items: center; justify-content: center; z-index: 99; cursor: pointer; transition: var(--transition); }
-        .fab-button:hover { background: var(--accent-hover); transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 28px rgba(249, 115, 22, 0.6); }
-        .fab-button svg { width: 24px; height: 24px; }
+        @media (max-width: 768px) {
+            body { padding: 1rem 0.5rem; }
+            .input-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .filter-bar { flex-direction: column; align-items: stretch; gap: 0.6rem; }
+            .filter-bar .input-group { width: 100%; }
+            th, td { padding: 0.75rem 0.6rem; font-size: 0.78rem; }
+            .stat-value { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -253,13 +259,11 @@
         <button class="tab-btn" id="btn-project" onclick="switchView('project')">Project Overview</button>
         <button class="tab-btn" id="btn-payment" onclick="switchView('payment')">Payment Details</button>
         
-        <!-- CONNECTION & MENU BUTTONS -->
         <button class="tab-btn" id="btnFirebase" style="margin-left: auto; color: #ffca28; border-color: rgba(255, 202, 40, 0.4);" onclick="showFirebaseModal()">🔥 Firebase DB</button>
         <button class="tab-btn" id="btnConnect" style="color: var(--accent); border-color: var(--accent);" onclick="connectLiveSync()">📁 Set Save Path</button>
         <button class="tab-btn" onclick="showImportModal()">⬆ Import</button>
         <button class="tab-btn" onclick="showExportModal()">⬇ Export</button>
 
-        <!-- Hidden Inputs for Importing -->
         <input type="file" id="importJsonInput" style="display: none;" accept=".json,.txt" onchange="importJSON(event)">
         <input type="file" id="importCsvInput" style="display: none;" accept=".csv" onchange="importCSV(event)">
         <input type="file" id="importExcelInput" style="display: none;" accept=".xlsx,.xls" multiple onchange="importProjectExcel(event)">
@@ -290,7 +294,7 @@
 
     <div class="table-container">
         <div id="paymentFormArea" style="display: none;" class="payment-form-container">
-            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Add 15-Day Cutoff Payment Entry</h3>
+            <h3 style="font-size: 0.95rem; margin-bottom: 0.85rem;">Add 15-Day Cutoff Payment Entry</h3>
             <div class="payment-form-grid">
                 <div class="input-group"><label>Month & Year</label><input type="month" id="cutoffMonthInput"></div>
                 <div class="input-group"><label>Cutoff Period</label><select id="cutoffPeriodInput"><option value="1-15">1st - 15th</option><option value="16-end">16th - End of Month</option></select></div>
@@ -307,12 +311,9 @@
     </div>
 </div>
 
-<!-- Floating Action Button (FAB) -->
-<button class="fab-button" onclick="document.getElementById('projectInput').focus(); window.scrollTo({top: 200, behavior: 'smooth'});" title="Quick Log Entry">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"></line>
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
+<!-- Floating Action Button (FAB) for quick mobile logging with ARC logo image -->
+<button class="fab-button" onclick="document.getElementById('projectInput').focus(); window.scrollTo({top: 150, behavior: 'smooth'});" title="Quick Log Entry">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" onerror="this.src='https://placehold.co/100x100/18181b/ffffff?text=ARC'" alt="ARC Logo">
 </button>
 
 <div id="customModal" class="modal-overlay">
@@ -326,7 +327,8 @@
 <script>
     let isAppEnabled = true; 
     let fileHandle = null;
-    let db = null; // Firebase Firestore Instance
+    let db = null; 
+    let auth = null; 
     let firebaseUnsubscribe = null;
 
     let workData = JSON.parse(localStorage.getItem('annotationData')) || [];
@@ -341,7 +343,7 @@
     let activeFilters = { projects: [], start: '', end: '' };
     let pendingExcelImports = [];
 
-    // --- IndexedDB for Save Handle ---
+    // --- IndexedDB for File Handle Persistence ---
     const dbPromise = new Promise((resolve, reject) => {
         const req = indexedDB.open('ARCDashboardDB', 1);
         req.onupgradeneeded = e => e.target.result.createObjectStore('settings');
@@ -354,7 +356,6 @@
     async function verifyFilePermission(handle) { if ((await handle.queryPermission({ mode: 'readwrite' })) === 'granted') return true; if ((await handle.requestPermission({ mode: 'readwrite' })) === 'granted') return true; return false; }
 
     window.addEventListener('DOMContentLoaded', async () => {
-        // Attempt to load local save handle
         const savedHandle = await getHandleFromDB();
         if (savedHandle) {
             fileHandle = savedHandle;
@@ -367,13 +368,12 @@
             } catch(e){}
         }
 
-        // Initialize Firebase if user stored local credentials
+        // Initialize Firebase from stored settings if available
         initFirebaseFromStorage();
-
         renderUI();
     });
 
-    // --- FIREBASE INTEGRATION ENGINE ---
+    // --- FIREBASE REALTIME SYNC ENGINE ---
     function initFirebaseFromStorage() {
         const storedConfigStr = localStorage.getItem('firebaseConfig');
         if (!storedConfigStr) {
@@ -392,9 +392,17 @@
                 firebase.initializeApp(config);
             }
             db = firebase.firestore();
+            auth = firebase.auth();
             
-            updateFirebaseStatus("online", "🔥 Firebase: Connected");
-            listenToFirebaseRealtime();
+            auth.signInAnonymously().then(() => {
+                updateFirebaseStatus("online", "🔥 Firebase: Connected");
+                listenToFirebaseRealtime();
+            }).catch((err) => {
+                console.warn("Auth sign-in warning:", err);
+                updateFirebaseStatus("online", "🔥 Firebase: Connected");
+                listenToFirebaseRealtime();
+            });
+
             return true;
         } catch (err) {
             console.error("Firebase init error:", err);
@@ -411,16 +419,20 @@
         if (state === "online") {
             ind.className = "sync-status sync-firebase";
             ind.innerHTML = `🟢 ${text}`;
-            btn.style.borderColor = "var(--success)";
-            btn.style.color = "var(--success)";
+            if (btn) {
+                btn.style.borderColor = "var(--success)";
+                btn.style.color = "var(--success)";
+            }
         } else if (state === "syncing") {
             ind.className = "sync-status sync-reconnect";
             ind.innerHTML = `⏳ Syncing...`;
         } else {
             ind.className = "sync-status sync-offline";
             ind.innerHTML = `🔴 ${text}`;
-            btn.style.borderColor = "rgba(255, 202, 40, 0.4)";
-            btn.style.color = "#ffca28";
+            if (btn) {
+                btn.style.borderColor = "rgba(255, 202, 40, 0.4)";
+                btn.style.color = "#ffca28";
+            }
         }
     }
 
@@ -431,7 +443,6 @@
         firebaseUnsubscribe = db.collection('arc_dashboard').doc('main_data').onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
-                // Optionally auto-update local state if cloud data has changed
                 if (data.workData && JSON.stringify(data.workData) !== JSON.stringify(workData)) {
                     workData = data.workData || [];
                     endedProjects = data.endedProjects || {};
@@ -457,6 +468,10 @@
         }
         updateFirebaseStatus("syncing", "Uploading...");
         try {
+            if (auth && !auth.currentUser) {
+                await auth.signInAnonymously();
+            }
+
             const payload = {
                 workData,
                 endedProjects,
@@ -469,7 +484,7 @@
             };
             await db.collection('arc_dashboard').doc('main_data').set(payload, { merge: true });
             updateFirebaseStatus("online", "Firebase: Synced");
-            openModal("Firebase Push Successful", "All current local data and history successfully pushed to your Firebase Cloud Database!", "alert");
+            openModal("Firebase Push Successful", "All current data successfully pushed to Firebase cloud! Your phone and PC will now stay in sync.", "alert");
         } catch (err) {
             console.error(err);
             updateFirebaseStatus("offline", "Firebase: Upload Failed");
@@ -484,6 +499,10 @@
         }
         updateFirebaseStatus("syncing", "Fetching...");
         try {
+            if (auth && !auth.currentUser) {
+                await auth.signInAnonymously();
+            }
+
             const doc = await db.collection('arc_dashboard').doc('main_data').get();
             if (doc.exists) {
                 const data = doc.data();
@@ -513,24 +532,24 @@
     function showFirebaseModal() {
         const savedConfig = localStorage.getItem('firebaseConfig') || '';
         const html = `
-            <p style="margin-bottom: 0.8rem; font-size: 0.85rem; color: var(--text-secondary);">
-                Paste your Firebase Web App Config JSON below. This will be safely stored <strong>locally in your browser</strong> so your API keys will never leak on GitHub!
+            <p style="margin-bottom: 0.75rem; font-size: 0.82rem; color: var(--text-secondary);">
+                Paste your Firebase Web App Config JSON below. Use the <strong>same configuration</strong> on both your phone and PC to enable instant real-time synchronization!
             </p>
             <div class="input-group">
                 <label>Firebase Configuration (JSON format)</label>
                 <textarea id="firebaseConfigJson" placeholder='{\n  "apiKey": "AIzaSy...",\n  "authDomain": "...",\n  "projectId": "...",\n  "storageBucket": "...",\n  "messagingSenderId": "...",\n  "appId": "..."\n}'></textarea>
             </div>
-            <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.85rem; flex-wrap: wrap;">
                 <button class="import-export-btn" style="flex: 1;" onclick="saveFirebaseConfig()">💾 Save Config</button>
                 <button class="import-export-btn" style="flex: 1; border-color: var(--danger); color: var(--danger);" onclick="clearFirebaseConfig()">🗑 Clear Config</button>
             </div>
-            <hr style="border: 0; border-top: 1px solid var(--border); margin: 1rem 0;">
-            <p style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem;">Cloud Database Actions</p>
-            <button class="import-export-btn" style="border-color: var(--accent); color: var(--accent);" onclick="pushDataToFirebase()">⬆ Push Local Data to Firebase Cloud</button>
-            <button class="import-export-btn" style="border-color: var(--bonus); color: var(--bonus);" onclick="pullDataFromFirebase()">⬇ Pull Data from Firebase Cloud</button>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 0.85rem 0;">
+            <p style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.4rem;">Cloud Database Actions</p>
+            <button class="import-export-btn" style="border-color: var(--accent); color: var(--accent);" onclick="pushDataToFirebase()">⬆ Push Local Data to Cloud</button>
+            <button class="import-export-btn" style="border-color: var(--bonus); color: var(--bonus);" onclick="pullDataFromFirebase()">⬇ Pull Data from Cloud</button>
         `;
 
-        openModal("🔥 Firebase Cloud Database Config", html, "custom");
+        openModal("🔥 Firebase Real-Time Sync Config", html, "custom");
         document.getElementById('modalActions').innerHTML = `<button class="btn-cancel" onclick="closeModal()">Close</button>`;
 
         if (savedConfig) {
@@ -550,7 +569,7 @@
             let parsed = JSON.parse(raw);
             localStorage.setItem('firebaseConfig', JSON.stringify(parsed));
             if (initFirebaseFromStorage()) {
-                openModal("Connected!", "Firebase Cloud config saved locally! You can now sync your data anytime.", "alert");
+                openModal("Connected!", "Firebase Cloud config saved! Real-time synchronization is now active between your devices.", "alert");
             }
         } catch(e) {
             openModal("JSON Parsing Error", "Please ensure your Firebase Config is valid JSON object format.", "alert");
@@ -562,7 +581,7 @@
         if (firebaseUnsubscribe) firebaseUnsubscribe();
         db = null;
         updateFirebaseStatus("offline", "🔥 Firebase: Disconnected");
-        openModal("Config Removed", "Firebase config removed from local browser memory.", "alert");
+        openModal("Config Removed", "Firebase config removed.", "alert");
     }
 
     // --- LOCAL FILE SYNC LOGIC ---
@@ -573,14 +592,8 @@
             if (fileHandle) {
                 try {
                     const hasPerm = await verifyFilePermission(fileHandle);
-                    if (!hasPerm) {
-                        fileHandle = null; 
-                    } else {
-                        await fileHandle.getFile();
-                    }
-                } catch (e) {
-                    fileHandle = null; 
-                }
+                    if (!hasPerm) fileHandle = null; else await fileHandle.getFile();
+                } catch (e) { fileHandle = null; }
             }
 
             if (!fileHandle) {
@@ -606,8 +619,7 @@
             saveAllData(); renderUI();
             
             document.getElementById('modalActions').innerHTML = `<button class="btn-submit" onclick="closeModal()">Got it!</button>`;
-            openModal("Sync Active", `Dashboard unlocked! Data is now actively saving to <strong>${fileHandle.name}</strong>.`, "alert");
-
+            openModal("Sync Active", `Dashboard unlocked! Data is now saving to <strong>${fileHandle.name}</strong>.`, "alert");
         } catch (err) {
             fileHandle = null;
         }
@@ -626,7 +638,6 @@
     async function saveAllData() {
         saveToLocalStorageOnly();
 
-        // 1. Save to File Handle if available
         if (fileHandle) {
             try {
                 const fullBackup = { workData, endedProjects, projectEarnings, projectBonuses, hourlyRates, cutoffPayments, manualTotalEarning };
@@ -640,9 +651,11 @@
             }
         }
 
-        // 2. Auto sync to Firebase if available
         if (db) {
             try {
+                if (auth && !auth.currentUser) {
+                    await auth.signInAnonymously();
+                }
                 const payload = {
                     workData,
                     endedProjects,
@@ -662,7 +675,7 @@
 
     function showExportModal() {
         const content = `
-            <p style="margin-bottom: 1rem;">How would you like to export your data?</p>
+            <p style="margin-bottom: 0.85rem;">How would you like to export your data?</p>
             <button class="import-export-btn" onclick="exportJSON()">📦 Export Full Backup (.json)</button>
             <button class="import-export-btn" onclick="exportCSV()">📊 Export Daily Logs (.csv / Excel)</button>
         `;
@@ -671,7 +684,7 @@
 
     function showImportModal() {
         const content = `
-            <p style="margin-bottom: 1rem; color: var(--danger);">Warning: Importing a Backup or CSV will overwrite current logs.</p>
+            <p style="margin-bottom: 0.85rem; color: var(--danger);">Warning: Importing will overwrite current logs.</p>
             <button class="import-export-btn" onclick="document.getElementById('importJsonInput').click(); closeModal();">📦 Import Full Backup (.json / .txt)</button>
             <button class="import-export-btn" onclick="document.getElementById('importCsvInput').click(); closeModal();">📊 Import Daily Logs (.csv / Excel)</button>
             <button class="import-export-btn" style="border-color: var(--success); color: var(--success);" onclick="document.getElementById('importExcelInput').click(); closeModal();">📈 Import Project Payments (.xlsx)</button>
@@ -679,7 +692,6 @@
         openModal("Import Data", content, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button>`;
     }
 
-    // --- MULTI-EXCEL UPLOAD ENGINE ---
     async function importProjectExcel(event) {
         const files = event.target.files;
         if (!files || files.length === 0) return;
@@ -701,7 +713,6 @@
 
                         if(json.length > 0) {
                             const row = json.find(r => r.owner_name && r.owner_name.includes('Ratul')) || json[0];
-                            
                             if(row) {
                                 pendingExcelImports.push({
                                     id: Date.now() + Math.random().toString(36).substr(2, 9),
@@ -741,15 +752,13 @@
             return;
         }
 
-        let html = `<p style="margin-bottom: 1rem; color: var(--text-secondary);">Please review the payments detected below. Click 'Update' to merge them into your dashboard.</p>`;
+        let html = `<p style="margin-bottom: 0.85rem; color: var(--text-secondary);">Please review the payments detected below. Click 'Update' to merge them into your dashboard.</p>`;
         
         pendingExcelImports.forEach(item => {
             const curEarn = projectEarnings[item.projectId] || 0;
             const newEarn = curEarn + item.personalPayment;
-            
             const curBon = projectBonuses[item.projectId] || 0;
             const newBon = curBon + item.bonus;
-            
             const curRate = hourlyRates[item.projectId] || 0;
             const newRate = item.rate > 0 ? item.rate : curRate;
 
@@ -757,14 +766,14 @@
             <div class="pending-import-card">
                 <h4>
                     Project ${item.projectId}
-                    <button class="btn-remove-pending" onclick="removePendingImport('${item.id}')" title="Discard this file">
+                    <button class="btn-remove-pending" onclick="removePendingImport('${item.id}')" title="Discard">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                 </h4>
                 <p><span>Earnings:</span> <span><span class="val-before">₱${curEarn.toFixed(2)}</span> ➔ <span class="val-after">+₱${item.personalPayment.toFixed(2)} = ₱${newEarn.toFixed(2)}</span></span></p>
                 <p><span>Bonus:</span> <span><span class="val-before">₱${curBon.toFixed(2)}</span> ➔ <span class="val-after">+₱${item.bonus.toFixed(2)} = ₱${newBon.toFixed(2)}</span></span></p>
                 <p><span>Hourly Rate:</span> <span><span class="val-before">₱${curRate.toFixed(2)}/hr</span> ➔ <span class="val-after">₱${newRate.toFixed(2)}/hr</span></span></p>
-                <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: left; opacity: 0.7;">Extracted from: ${item.fileName}</div>
+                <div style="font-size: 0.68rem; color: var(--text-secondary); margin-top: 0.4rem; text-align: left; opacity: 0.7;">From: ${item.fileName}</div>
             </div>`;
         });
 
@@ -783,17 +792,14 @@
 
     function confirmExcelImport() {
         let processedCount = pendingExcelImports.length;
-        
         pendingExcelImports.forEach(item => {
             projectEarnings[item.projectId] = (projectEarnings[item.projectId] || 0) + item.personalPayment;
             projectBonuses[item.projectId] = (projectBonuses[item.projectId] || 0) + item.bonus;
             if (item.rate > 0) hourlyRates[item.projectId] = item.rate;
         });
-        
         pendingExcelImports = [];
         saveAllData(); 
         renderUI();
-        
         openModal("Import Successful", `Successfully merged ${processedCount} project file(s) into your dashboard balances!`, "alert");
     }
 
@@ -802,7 +808,7 @@
     function importJSON(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const importedData = JSON.parse(e.target.result); workData = importedData.workData || []; endedProjects = importedData.endedProjects || {}; projectEarnings = importedData.projectEarnings || {}; projectBonuses = importedData.projectBonuses || {}; hourlyRates = importedData.hourlyRates || {}; cutoffPayments = importedData.cutoffPayments || []; manualTotalEarning = importedData.manualTotalEarning !== undefined ? importedData.manualTotalEarning : null; saveAllData(); renderUI(); openModal("Import Successful", "Backup data loaded perfectly.", "alert"); } catch (err) { openModal("Import Failed", "Invalid JSON or TXT format.", "alert"); } event.target.value = ''; }; reader.readAsText(file); }
     function importCSV(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { const rows = e.target.result.split('\n'); let newLogs = []; for (let i = 1; i < rows.length; i++) { if (!rows[i].trim()) continue; const cols = rows[i].split(','); if (cols.length >= 4) { newLogs.push({ date: cols[0].trim(), project: cols[1].trim(), hours: parseFloat(cols[2]), maps: parseInt(cols[3], 10) }); } } if (newLogs.length > 0) { workData = newLogs; saveAllData(); renderUI(); openModal("Import Successful", `Successfully imported ${newLogs.length} logs from Excel.`, "alert"); } else { openModal("Import Failed", "Could not find valid log data in the CSV.", "alert"); } event.target.value = ''; }; reader.readAsText(file); }
 
-    function updateRealTimeClock() { const now = new Date(); document.getElementById('currentDateDisplay').innerText = `${now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | ${now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`; }
+    function updateRealTimeClock() { const now = new Date(); document.getElementById('currentDateDisplay').innerText = `${now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} | ${now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`; }
     setInterval(updateRealTimeClock, 1000); updateRealTimeClock(); document.getElementById('dateInput').valueAsDate = new Date(); document.getElementById('cutoffMonthInput').value = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
 
     function formatHoursMinutes(decimalHours) { const totalMinutes = Math.round(decimalHours * 60); const hours = Math.floor(totalMinutes / 60); const minutes = totalMinutes % 60; if (hours === 0 && minutes === 0) return '0h 0m'; if (hours === 0) return `${minutes}m`; if (minutes === 0) return `${hours}h`; return `${hours}h ${minutes}m`; }
@@ -810,11 +816,11 @@
 
     function addCutoffPayment() { const monthVal = document.getElementById('cutoffMonthInput').value; const periodVal = document.getElementById('cutoffPeriodInput').value; const hoursVal = parseFloat(document.getElementById('cutoffHoursInput').value); const rateVal = parseFloat(document.getElementById('cutoffRateInput').value); const totalVal = parseFloat(document.getElementById('cutoffTotalInput').value); if (!monthVal || isNaN(totalVal)) return openModal("Missing Information", "Please enter valid month and payment values.", "alert"); cutoffPayments.push({ id: Date.now(), month: monthVal, period: periodVal, hours: isNaN(hoursVal) ? 0 : hoursVal, rate: isNaN(rateVal) ? 0 : rateVal, total: totalVal }); document.getElementById('cutoffHoursInput').value = ''; document.getElementById('cutoffRateInput').value = ''; document.getElementById('cutoffTotalInput').value = ''; saveAllData(); renderUI(); }
     function deleteCutoffPayment(id) { openModal("Delete Cutoff Payment", "Remove this payment entry?", "confirm", () => { cutoffPayments = cutoffPayments.filter(p => p.id !== id); saveAllData(); renderUI(); }); }
-    function triggerDirectTotalEarning(e) { if (e && e.target.classList.contains('btn-view-est')) return; const currentVal = getCalculatedTotalEarning(); const editForm = document.createElement('div'); editForm.innerHTML = `<p style="margin-bottom: 1rem;">Directly set or adjust your overall <strong>Total Earning</strong> (₱):</p><div class="input-group"><label>Total Earning Amount (₱)</label><input type="number" step="0.01" id="directEarningInput" value="${currentVal.toFixed(2)}"></div>`; openModal("Set Total Earning", editForm, "edit", () => { const val = parseFloat(document.getElementById('directEarningInput').value); if (isNaN(val) || val < 0) return openModal("Invalid Amount", "Please enter a valid amount.", "alert"); manualTotalEarning = val; saveAllData(); renderUI(); }); }
+    function triggerDirectTotalEarning(e) { if (e && e.target.classList.contains('btn-view-est')) return; const currentVal = getCalculatedTotalEarning(); const editForm = document.createElement('div'); editForm.innerHTML = `<p style="margin-bottom: 0.85rem;">Directly set or adjust your overall <strong>Total Earning</strong> (₱):</p><div class="input-group"><label>Total Earning Amount (₱)</label><input type="number" step="0.01" id="directEarningInput" value="${currentVal.toFixed(2)}"></div>`; openModal("Set Total Earning", editForm, "edit", () => { const val = parseFloat(document.getElementById('directEarningInput').value); if (isNaN(val) || val < 0) return openModal("Invalid Amount", "Please enter a valid amount.", "alert"); manualTotalEarning = val; saveAllData(); renderUI(); }); }
     function getCalculatedTotalEarning() { if (manualTotalEarning !== null) return manualTotalEarning; return cutoffPayments.reduce((sum, item) => sum + Math.max(0, item.total - 100), 0); }
     function computeEstimatedEarnings() { let totalEarningsSum = 0, totalBonusSum = 0; [...new Set(workData.map(r => r.project))].forEach(proj => { const projHours = workData.filter(r => r.project === proj).reduce((s, r) => s + r.hours, 0); const rate = hourlyRates[proj]; if (projectEarnings[proj] !== undefined) totalEarningsSum += projectEarnings[proj]; else if (rate !== undefined) totalEarningsSum += projHours * rate; if (projectBonuses[proj] !== undefined) totalBonusSum += projectBonuses[proj]; }); return { estimated: totalEarningsSum, bonus: totalBonusSum, total: totalEarningsSum + totalBonusSum }; }
-    function showEstimatedModal(e) { if (e) e.stopPropagation(); const data = computeEstimatedEarnings(); openModal("Estimated Earnings", `<div style="font-size: 1rem; font-weight: 500; color: var(--success); margin-bottom: 0.5rem;">Estimated Base: ₱${data.estimated.toFixed(2)}</div><div style="font-size: 1rem; font-weight: 500; color: var(--bonus); margin-bottom: 0.75rem;">Total Bonuses: ₱${data.bonus.toFixed(2)}</div><div style="font-size: 1.15rem; font-weight: 700; color: var(--accent); border-top: 1px solid var(--border); padding-top: 0.75rem;">Total: ₱${data.total.toFixed(2)}</div>`, "alert"); }
-    function openModal(title, message, type = 'alert', confirmCallback = null) { document.getElementById('modalTitle').innerText = title; if (typeof message === 'string') document.getElementById('modalMessage').innerHTML = message; else { document.getElementById('modalMessage').innerHTML = ''; document.getElementById('modalMessage').appendChild(message); } const actions = document.getElementById('modalActions'); if (type === 'alert') actions.innerHTML = `<button class="btn-submit" onclick="closeModal()">Got it</button>`; else if (type === 'confirm') { window.executeModalAction = () => { if(confirmCallback) confirmCallback(); closeModal(); }; actions.innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button> <button class="btn-danger" onclick="executeModalAction()">Confirm</button>`; } else if (type === 'edit') { window.executeModalAction = () => { if(confirmCallback) confirmCallback(); closeModal(); }; actions.innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button> <button class="btn-submit" style="height: auto; padding: 0.6rem 1.2rem;" onclick="executeModalAction()">Save</button>`; } document.getElementById('customModal').classList.add('active'); }
+    function showEstimatedModal(e) { if (e) e.stopPropagation(); const data = computeEstimatedEarnings(); openModal("Estimated Earnings", `<div style="font-size: 0.95rem; font-weight: 500; color: var(--success); margin-bottom: 0.4rem;">Estimated Base: ₱${data.estimated.toFixed(2)}</div><div style="font-size: 0.95rem; font-weight: 500; color: var(--bonus); margin-bottom: 0.6rem;">Total Bonuses: ₱${data.bonus.toFixed(2)}</div><div style="font-size: 1.1rem; font-weight: 700; color: var(--accent); border-top: 1px solid var(--border); padding-top: 0.6rem;">Total: ₱${data.total.toFixed(2)}</div>`, "alert"); }
+    function openModal(title, message, type = 'alert', confirmCallback = null) { document.getElementById('modalTitle').innerText = title; if (typeof message === 'string') document.getElementById('modalMessage').innerHTML = message; else { document.getElementById('modalMessage').innerHTML = ''; document.getElementById('modalMessage').appendChild(message); } const actions = document.getElementById('modalActions'); if (type === 'alert') actions.innerHTML = `<button class="btn-submit" onclick="closeModal()">Got it</button>`; else if (type === 'confirm') { window.executeModalAction = () => { if(confirmCallback) confirmCallback(); closeModal(); }; actions.innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button> <button class="btn-danger" onclick="executeModalAction()">Confirm</button>`; } else if (type === 'edit') { window.executeModalAction = () => { if(confirmCallback) confirmCallback(); closeModal(); }; actions.innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button> <button class="btn-submit" style="height: auto; padding: 0.55rem 1rem;" onclick="executeModalAction()">Save</button>`; } document.getElementById('customModal').classList.add('active'); }
     function closeModal() { document.getElementById('customModal').classList.remove('active'); }
 
     function addEntry() { const dateVal = document.getElementById('dateInput').value; const projectRaw = document.getElementById('projectInput').value; const hoursRaw = document.getElementById('hoursInput').value; const mapsRaw = document.getElementById('mapsInput').value; if (!dateVal || !projectRaw || !hoursRaw || !mapsRaw) return openModal("Missing Information", "Please complete all fields.", "alert"); const projects = projectRaw.split(',').map(p => p.trim().toUpperCase()); const hours = hoursRaw.split(',').map(h => parseFloat(h.trim())); const maps = mapsRaw.split(',').map(m => parseInt(m.trim(), 10)); if (projects.length !== hours.length || projects.length !== maps.length) return openModal("Mismatch", "Lists must have the same length.", "alert"); if (hours.some(isNaN) || maps.some(isNaN)) return openModal("Invalid", "Numbers only for time/maps.", "alert"); const closedProjects = projects.filter(p => endedProjects[p] && endedProjects[p].isEnded); if (closedProjects.length > 0) return openModal("Ended", `Cannot log for closed projects: ${closedProjects.join(', ')}`, "alert"); for (let i = 0; i < projects.length; i++) workData.push({ date: dateVal, project: projects[i], hours: hours[i], maps: maps[i] }); document.getElementById('projectInput').value = ''; document.getElementById('hoursInput').value = ''; document.getElementById('mapsInput').value = ''; document.getElementById('projectInput').focus(); saveAllData(); renderUI(); }
@@ -834,7 +840,6 @@
     function renderUI() {
         const thead = document.getElementById('tableHead'); const tbody = document.getElementById('tableBody'); tbody.innerHTML = ''; let totalHoursSum = 0; document.getElementById('directTotalEarnings').innerText = '₱' + getCalculatedTotalEarning().toFixed(2);
 
-        // Calculate Paid & Unpaid Hours
         const allLoggedHours = workData.reduce((sum, item) => sum + item.hours, 0);
         const totalPaidHours = cutoffPayments.reduce((sum, p) => sum + (p.hours || 0), 0);
         const unpaidHours = Math.max(0, allLoggedHours - totalPaidHours);
@@ -843,9 +848,9 @@
         document.getElementById('unpaidHours').innerText = formatHoursMinutes(unpaidHours);
 
         if (currentView === 'payment') {
-            thead.innerHTML = `<tr><th>Month/Year</th><th>Cutoff Period</th><th>Work Hours</th><th>Hourly Rate</th><th>Total Payment</th><th style="width: 80px; text-align: center;">Action</th></tr>`;
+            thead.innerHTML = `<tr><th>Month/Year</th><th>Cutoff Period</th><th>Work Hours</th><th>Hourly Rate</th><th>Total Payment</th><th style="width: 70px; text-align: center;">Action</th></tr>`;
             if (cutoffPayments.length === 0) tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">No payment cutoffs added yet.</div></td></tr>`;
-            else { cutoffPayments.sort((a,b) => b.month.localeCompare(a.month)).forEach(item => { const periodText = item.period === '1-15' ? '1st - 15th' : '16th - End of Month'; const formattedMonth = new Date(item.month + '-01').toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); tbody.innerHTML += `<tr><td><strong>${formattedMonth}</strong></td><td>${periodText}</td><td class="number-cell">${item.hours ? item.hours.toFixed(1) + ' hrs' : '-'}</td><td class="number-cell">${item.rate ? '₱' + item.rate.toFixed(2) + '/hr' : '-'}</td><td class="number-cell earning-text">₱${item.total.toFixed(2)}</td><td class="action-cell"><button class="btn-icon delete" onclick="deleteCutoffPayment(${item.id})" title="Delete"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`; }); }
+            else { cutoffPayments.sort((a,b) => b.month.localeCompare(a.month)).forEach(item => { const periodText = item.period === '1-15' ? '1st - 15th' : '16th - End'; const formattedMonth = new Date(item.month + '-01').toLocaleDateString(undefined, { month: 'short', year: 'numeric' }); tbody.innerHTML += `<tr><td><strong>${formattedMonth}</strong></td><td>${periodText}</td><td class="number-cell">${item.hours ? item.hours.toFixed(1) + 'h' : '-'}</td><td class="number-cell">${item.rate ? '₱' + item.rate.toFixed(2) : '-'}</td><td class="number-cell earning-text">₱${item.total.toFixed(2)}</td><td class="action-cell"><button class="btn-icon delete" onclick="deleteCutoffPayment(${item.id})" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`; }); }
             document.getElementById('totalHours').innerText = formatHoursMinutes(allLoggedHours); return;
         }
 
@@ -854,7 +859,7 @@
         if (displayData.length === 0) { thead.innerHTML = `<tr><th>Logs</th></tr>`; tbody.innerHTML = `<tr><td><div class="empty-state">No sessions found.</div></td></tr>`; document.getElementById('totalHours').innerText = '0h 0m'; return; }
 
         if (currentView === 'daily') {
-            thead.innerHTML = `<tr><th>Date</th><th>Project ID</th><th>Project Time</th><th>Project Maps</th><th>Daily Total Time</th><th style="width: 100px; text-align: center;">Action</th></tr>`;
+            thead.innerHTML = `<tr><th>Date</th><th>Project ID</th><th>Time</th><th>Maps</th><th>Daily Total</th><th style="width: 85px; text-align: center;">Action</th></tr>`;
             [...new Set(displayData.map(item => item.date))].sort((a, b) => new Date(b) - new Date(a)).forEach(dateStr => {
                 const dailyEntries = displayData.filter(item => item.date === dateStr); const totalDailyHours = dailyEntries.reduce((sum, entry) => sum + entry.hours, 0); const formattedDate = new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 dailyEntries.forEach((row, index) => {
@@ -863,28 +868,28 @@
                     
                     const rate = hourlyRates[row.project];
                     const rateStr = rate !== undefined ? `₱${rate.toFixed(2)}/hr` : "Not Set";
-                    tr += `<td><span class="project-tag" title="Hourly Rate: ${rateStr}">${row.project}</span></td><td class="number-cell">${formatHoursMinutes(row.hours)}</td><td class="number-cell">${row.maps}</td>`;
+                    tr += `<td><span class="project-tag" title="Rate: ${rateStr}">${row.project}</span></td><td class="number-cell">${formatHoursMinutes(row.hours)}</td><td class="number-cell">${row.maps}</td>`;
                     
                     if (index === 0) tr += `<td rowspan="${dailyEntries.length}" class="merged-cell number-cell total-time-text" style="cursor: pointer;" onclick="triggerEditDailyTotal('${dateStr}', ${totalDailyHours})">${formatHoursMinutes(totalDailyHours)}</td>`;
-                    tr += `<td class="action-cell"><button class="btn-icon" onclick="triggerEdit(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button><button class="btn-icon delete" onclick="triggerDelete(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`;
+                    tr += `<td class="action-cell"><button class="btn-icon" onclick="triggerEdit(${originalIndex})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button><button class="btn-icon delete" onclick="triggerDelete(${originalIndex})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`;
                     tbody.innerHTML += tr;
                 });
             });
         } else if (currentView === 'project') {
-            thead.innerHTML = `<tr><th>Project ID</th><th>Start Date</th><th>Total Maps</th><th>Total Hours</th><th>Estimated Earning</th><th>Status</th></tr>`;
+            thead.innerHTML = `<tr><th>Project</th><th>Start</th><th>Maps</th><th>Hours</th><th>Earnings</th><th>Status</th></tr>`;
             const projectSummary = {};
             displayData.forEach(row => { totalHoursSum += row.hours; if (!projectSummary[row.project]) projectSummary[row.project] = { project: row.project, maps: 0, hours: 0, sessions: 0, startDate: row.date, latestDate: row.date }; projectSummary[row.project].maps += row.maps; projectSummary[row.project].hours += row.hours; projectSummary[row.project].sessions += 1; if (row.date < projectSummary[row.project].startDate) projectSummary[row.project].startDate = row.date; if (row.date > projectSummary[row.project].latestDate) projectSummary[row.project].latestDate = row.date; });
             
             Object.values(projectSummary).sort((a, b) => new Date(b.latestDate) - new Date(a.latestDate)).forEach(proj => {
-                const isEnded = endedProjects[proj.project]?.isEnded; const formattedStartDate = new Date(proj.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                const rate = hourlyRates[proj.project]; let projEarning = projectEarnings[proj.project] !== undefined ? projectEarnings[proj.project] : (rate !== undefined ? proj.hours * rate : 0); const projBonus = projectBonuses[proj.project] || 0; const earningVal = `₱${projEarning.toFixed(2)}${projBonus > 0 ? ` <span style="font-size: 0.8rem; color: var(--bonus); font-weight: 500;">(+ ₱${projBonus.toFixed(2)} bonus)</span>` : ''}`;
+                const isEnded = endedProjects[proj.project]?.isEnded; const formattedStartDate = new Date(proj.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                const rate = hourlyRates[proj.project]; let projEarning = projectEarnings[proj.project] !== undefined ? projectEarnings[proj.project] : (rate !== undefined ? proj.hours * rate : 0); const projBonus = projectBonuses[proj.project] || 0; const earningVal = `₱${projEarning.toFixed(2)}${projBonus > 0 ? ` <span style="font-size: 0.75rem; color: var(--bonus);">(+₱${projBonus.toFixed(2)})</span>` : ''}`;
                 
                 const rateStr = rate !== undefined ? `₱${rate.toFixed(2)}/hr` : "Not Set";
-                let projectTagHtml = isEnded ? `<span class="project-tag clickable" onclick="triggerHourlyRate('${proj.project}')" title="Hourly Rate: ${rateStr} (Click to Edit)">${proj.project}</span>` : `<span class="project-tag" title="Hourly Rate: ${rateStr}">${proj.project}</span>`;
+                let projectTagHtml = isEnded ? `<span class="project-tag clickable" onclick="triggerHourlyRate('${proj.project}')" title="Rate: ${rateStr}">${proj.project}</span>` : `<span class="project-tag" title="Rate: ${rateStr}">${proj.project}</span>`;
                 
-                let statusHtml = isEnded ? `<div class="status-cell-container"><div class="status-wrapper"><span style="color: var(--danger); font-size: 0.85rem; font-weight: 600;">Ended</span><span class="end-date-badge">End: ${new Date(endedProjects[proj.project].endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span></div><div class="action-buttons-wrapper"><button class="btn-earning-project" onclick="triggerAddEarning('${proj.project}')">Add Earning</button><button class="btn-bonus-project" onclick="triggerAddBonus('${proj.project}')">Bonus (₱)</button><button class="btn-reopen-project" onclick="triggerReopenProject('${proj.project}')">Reopen Project</button></div></div>` : `<div class="status-cell-container"><span style="color: #22c55e; font-size: 0.85rem; font-weight: 600;">Active</span><div class="action-buttons-wrapper"><button class="btn-end-project" onclick="triggerEndProject('${proj.project}')">End Project</button></div></div>`;
+                let statusHtml = isEnded ? `<div class="status-cell-container"><div class="status-wrapper"><span style="color: var(--danger); font-size: 0.8rem; font-weight: 600;">Ended</span><span class="end-date-badge">${new Date(endedProjects[proj.project].endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span></div><div class="action-buttons-wrapper"><button class="btn-earning-project" onclick="triggerAddEarning('${proj.project}')">Earn</button><button class="btn-bonus-project" onclick="triggerAddBonus('${proj.project}')">Bonus</button><button class="btn-reopen-project" onclick="triggerReopenProject('${proj.project}')">Reopen</button></div></div>` : `<div class="status-cell-container"><span style="color: #22c55e; font-size: 0.8rem; font-weight: 600;">Active</span><div class="action-buttons-wrapper"><button class="btn-end-project" onclick="triggerEndProject('${proj.project}')">End</button></div></div>`;
                 
-                tbody.innerHTML += `<tr><td>${projectTagHtml}</td><td style="font-size: 0.85rem; color: var(--text-secondary);">${formattedStartDate}</td><td class="number-cell" style="font-weight: 700;">${proj.maps}</td><td class="number-cell total-time-text">${formatHoursMinutes(proj.hours)}</td><td class="number-cell earning-text">${earningVal}</td><td>${statusHtml}</td></tr>`;
+                tbody.innerHTML += `<tr><td>${projectTagHtml}</td><td style="font-size: 0.8rem; color: var(--text-secondary);">${formattedStartDate}</td><td class="number-cell" style="font-weight: 700;">${proj.maps}</td><td class="number-cell total-time-text">${formatHoursMinutes(proj.hours)}</td><td class="number-cell earning-text">${earningVal}</td><td>${statusHtml}</td></tr>`;
             });
         }
         document.getElementById('totalHours').innerText = formatHoursMinutes(totalHoursSum);
