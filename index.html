@@ -16,6 +16,7 @@
     <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <style>
         :root {
@@ -406,7 +407,7 @@
             return true;
         } catch (err) {
             console.error("Firebase init error:", err);
-            updateFirebaseStatus("offline", "🔥 Firebase: Error");
+            updateFirebaseStatus("error", "🔥 Firebase: Error");
             return false;
         }
     }
@@ -426,6 +427,13 @@
         } else if (state === "syncing") {
             ind.className = "sync-status sync-reconnect";
             ind.innerHTML = `⏳ Syncing...`;
+        } else if (state === "error") {
+            ind.className = "sync-status sync-offline";
+            ind.innerHTML = `❌ ${text}`;
+            if (btn) {
+                btn.style.borderColor = "var(--danger)";
+                btn.style.color = "var(--danger)";
+            }
         } else {
             ind.className = "sync-status sync-offline";
             ind.innerHTML = `🔴 ${text}`;
@@ -458,6 +466,7 @@
             }
         }, (err) => {
             console.warn("Firestore realtime listener error:", err);
+            updateFirebaseStatus("error", "🔥 Firebase: Error");
         });
     }
 
@@ -487,8 +496,8 @@
             openModal("Firebase Push Successful", "All current data successfully pushed to Firebase cloud! Your phone and PC will now stay in sync.", "alert");
         } catch (err) {
             console.error(err);
-            updateFirebaseStatus("offline", "Firebase: Upload Failed");
-            openModal("Upload Error", "Failed to upload data to Firebase: " + err.message, "alert");
+            updateFirebaseStatus("error", "🔥 Firebase: Error");
+            openModal("Upload Error", `<div style="color: var(--danger); font-weight: 600; margin-bottom: 0.5rem;">Failed to upload to Firebase:</div><code style="display: block; background: var(--bg-base); padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; word-break: break-all;">${err.message}</code><p style="margin-top: 0.75rem; font-size: 0.8rem;">💡 <strong>Quick Fix:</strong> Check your Firestore Security Rules in the Firebase Console and ensure they allow read/write or are not expired (see Firebase Setup Guide).</p>`, "alert");
         }
     }
 
@@ -524,8 +533,8 @@
             }
         } catch (err) {
             console.error(err);
-            updateFirebaseStatus("offline", "Firebase: Fetch Failed");
-            openModal("Download Error", "Failed to pull data from Firebase: " + err.message, "alert");
+            updateFirebaseStatus("error", "🔥 Firebase: Error");
+            openModal("Download Error", `<div style="color: var(--danger); font-weight: 600; margin-bottom: 0.5rem;">Failed to pull from Firebase:</div><code style="display: block; background: var(--bg-base); padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; word-break: break-all;">${err.message}</code><p style="margin-top: 0.75rem; font-size: 0.8rem;">💡 <strong>Quick Fix:</strong> Check your Firestore Security Rules in the Firebase Console and ensure they allow read/write (see Firebase Setup Guide).</p>`, "alert");
         }
     }
 
@@ -547,6 +556,7 @@
             <p style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.4rem;">Cloud Database Actions</p>
             <button class="import-export-btn" style="border-color: var(--accent); color: var(--accent);" onclick="pushDataToFirebase()">⬆ Push Local Data to Cloud</button>
             <button class="import-export-btn" style="border-color: var(--bonus); color: var(--bonus);" onclick="pullDataFromFirebase()">⬇ Pull Data from Cloud</button>
+            <button class="import-export-btn" style="border-color: var(--border); color: var(--text-secondary); margin-top: 0.5rem;" onclick="testFirebaseConnection()">🔍 Test Connection & Run Diagnostics</button>
         `;
 
         openModal("🔥 Firebase Real-Time Sync Config", html, "custom");
@@ -561,6 +571,33 @@
         }
     }
 
+    async function testFirebaseConnection() {
+        if (!db) {
+            openModal("Diagnostics", "Firebase is not initialized. Please save a valid config first.", "alert");
+            return;
+        }
+        openModal("Diagnostics", "Testing connection and permissions...", "alert");
+        try {
+            if (auth && !auth.currentUser) {
+                await auth.signInAnonymously();
+            }
+            // Test write & read
+            const testRef = db.collection('arc_dashboard').doc('connection_test');
+            await testRef.set({ timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            const docSnap = await testRef.get();
+            if (docSnap.exists) {
+                updateFirebaseStatus("online", "Firebase: Connected");
+                openModal("Diagnostics Success! 🎉", "Successfully wrote and read test data from Firestore. Your Firebase connection and security rules are working correctly!", "alert");
+            } else {
+                openModal("Diagnostics Warning", "Connected to Firebase, but test document was not found.", "alert");
+            }
+        } catch (err) {
+            console.error(err);
+            updateFirebaseStatus("error", "🔥 Firebase: Error");
+            openModal("Diagnostics Failed ❌", `<div style="color: var(--danger); font-weight: 600; margin-bottom: 0.5rem;">Error Details:</div><code style="display: block; background: var(--bg-base); padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; word-break: break-all; margin-bottom: 0.75rem;">${err.message}</code><p style="font-size: 0.85rem; line-height: 1.5;"><strong>Common Causes:</strong><br>1. <strong>Firestore Security Rules:</strong> Ensure your rules allow read and write (see <a href="firebase_setup_guide.md" target="_blank" style="color: var(--accent);">Firebase Setup Guide</a> Step 2).<br>2. <strong>Incorrect Config:</strong> Double-check your API key and project ID.<br>3. <strong>Database not created:</strong> Make sure Firestore Database is created in your Firebase Console.</p>`, "alert");
+        }
+    }
+
     function saveFirebaseConfig() {
         const raw = document.getElementById('firebaseConfigJson').value.trim();
         if (!raw) return openModal("Invalid Input", "Please enter valid configuration JSON.", "alert");
@@ -569,7 +606,7 @@
             let parsed = JSON.parse(raw);
             localStorage.setItem('firebaseConfig', JSON.stringify(parsed));
             if (initFirebaseFromStorage()) {
-                openModal("Connected!", "Firebase Cloud config saved! Real-time synchronization is now active between your devices.", "alert");
+                openModal("Connected!", "Firebase Cloud config saved! Click 'Test Connection & Run Diagnostics' to verify everything works.", "alert");
             }
         } catch(e) {
             openModal("JSON Parsing Error", "Please ensure your Firebase Config is valid JSON object format.", "alert");
@@ -669,6 +706,7 @@
                 await db.collection('arc_dashboard').doc('main_data').set(payload, { merge: true });
             } catch(e) {
                 console.warn("Background Firebase auto-sync notice:", e);
+                updateFirebaseStatus("error", "🔥 Firebase: Error");
             }
         }
     }
@@ -889,7 +927,7 @@
                 
                 let statusHtml = isEnded ? `<div class="status-cell-container"><div class="status-wrapper"><span style="color: var(--danger); font-size: 0.8rem; font-weight: 600;">Ended</span><span class="end-date-badge">${new Date(endedProjects[proj.project].endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span></div><div class="action-buttons-wrapper"><button class="btn-earning-project" onclick="triggerAddEarning('${proj.project}')">Earn</button><button class="btn-bonus-project" onclick="triggerAddBonus('${proj.project}')">Bonus</button><button class="btn-reopen-project" onclick="triggerReopenProject('${proj.project}')">Reopen</button></div></div>` : `<div class="status-cell-container"><span style="color: #22c55e; font-size: 0.8rem; font-weight: 600;">Active</span><div class="action-buttons-wrapper"><button class="btn-end-project" onclick="triggerEndProject('${proj.project}')">End</button></div></div>`;
                 
-                tbody.innerHTML += `<tr><td>${projectTagHtml}</td><td style="font-size: 0.8rem; color: var(--text-secondary);">${formattedStartDate}</td><td class="number-cell" style="font-weight: 700;">${proj.maps}</td><td class="number-cell total-time-text">${formatHoursMinutes(proj.hours)}</td><td class="number-cell earning-text">${earningVal}</td><td>${statusHtml}</td></tr>`;
+                tbody.innerHTML += `<tr><td>${projectTagHtml}</td><td style="font-size: 0.80rem; color: var(--text-secondary);">${formattedStartDate}</td><td class="number-cell" style="font-weight: 700;">${proj.maps}</td><td class="number-cell total-time-text">${formatHoursMinutes(proj.hours)}</td><td class="number-cell earning-text">${earningVal}</td><td>${statusHtml}</td></tr>`;
             });
         }
         document.getElementById('totalHours').innerText = formatHoursMinutes(totalHoursSum);
