@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARC Work Track(Ratul)</title>
+    <!-- SVG Favicon for browser tab -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2309090b'/><path d='M30 75 L50 25 L70 75 M38 58 L62 58' stroke='%23f97316' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='72' cy='28' r='7' fill='%2322c55e'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- SheetJS for Excel Reading -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -63,22 +69,24 @@
         .btn-view-est:hover { color: var(--text-primary); border-color: var(--accent); }
 
         .input-panel { background: rgba(24, 24, 27, 0.6); backdrop-filter: blur(12px); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border); }
-        .input-panel h2 { font-size: 1.125rem; margin-bottom: 1.5rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-        .batch-hint { font-size: 0.8rem; color: var(--text-secondary); font-weight: 400; }
+        .input-panel h2 { font-size: 1.125rem; margin-bottom: 1.5rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        .sync-status-group { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
         .sync-status { font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer; transition: var(--transition);}
         .sync-status:hover { background: var(--bg-surface-hover); }
         .sync-offline { color: var(--danger); border-color: var(--danger-bg); background: var(--danger-bg); }
         .sync-reconnect { color: #eab308; border-color: rgba(234, 179, 8, 0.2); background: rgba(234, 179, 8, 0.1); }
         .sync-online { color: var(--success); border-color: var(--success-bg); background: var(--success-bg); }
+        .sync-firebase { color: #ffca28; border-color: rgba(255, 202, 40, 0.2); background: rgba(255, 202, 40, 0.1); }
         
         .input-grid { display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr auto; gap: 1rem; align-items: end; }
-        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
         .input-group label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
         
         *:disabled { opacity: 0.4; cursor: not-allowed !important; pointer-events: none; }
         
-        input, select { width: 100%; background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary); padding: 0.875rem 1rem; border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit; outline: none; transition: var(--transition); }
-        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        input, select, textarea { width: 100%; background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary); padding: 0.875rem 1rem; border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit; outline: none; transition: var(--transition); }
+        textarea { resize: vertical; min-height: 90px; font-family: monospace; font-size: 0.82rem; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
         .date-input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
         .date-input-wrapper svg { position: absolute; right: 12px; color: var(--text-secondary); pointer-events: none; width: 18px; height: 18px; transition: var(--transition); }
@@ -104,7 +112,7 @@
         .end-date-badge { font-size: 0.8rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.05); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border); }
 
         .view-controls { display: flex; gap: 0.5rem; margin-bottom: -1rem; z-index: 5; position: relative; flex-wrap: wrap;}
-        .tab-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.75rem 1.5rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: none; font-size: 0.9rem; margin-bottom: -1px; z-index: 1; }
+        .tab-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.75rem 1.25rem; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: none; font-size: 0.85rem; margin-bottom: -1px; z-index: 1; }
         .tab-btn.active { background: var(--bg-surface); color: var(--accent); border-top: 2px solid var(--accent); font-weight: 700; z-index: 3; }
         .tab-btn:hover:not(.active):not(:disabled) { background: var(--bg-surface-hover); color: var(--text-primary); }
 
@@ -140,25 +148,24 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; width: 90%; max-width: 460px; transform: translateY(30px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
+        .modal-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; width: 90%; max-width: 520px; transform: translateY(30px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
         .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
         .modal-header { margin-bottom: 1rem; }
         .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
         
-        .modal-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; max-height: 55vh; overflow-y: auto; padding-right: 0.5rem; }
+        .modal-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; max-height: 60vh; overflow-y: auto; padding-right: 0.5rem; }
         .modal-body::-webkit-scrollbar { width: 6px; }
         .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         
-        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap; }
         
         .btn-cancel { background: transparent; color: var(--text-primary); border: 1px solid var(--border); padding: 0.6rem 1.2rem; }
         .btn-cancel:hover:not(:disabled) { background: var(--bg-surface-hover); }
         .btn-danger { background: var(--danger); color: white; padding: 0.6rem 1.2rem; }
         
-        .import-export-btn { display: flex; justify-content: center; align-items: center; width: 100%; padding: 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 0.5rem; border: 1px solid var(--border); background: var(--bg-surface-hover); color: var(--text-primary); cursor: pointer; transition: var(--transition); }
+        .import-export-btn { display: flex; justify-content: center; align-items: center; width: 100%; padding: 0.85rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 0.5rem; border: 1px solid var(--border); background: var(--bg-surface-hover); color: var(--text-primary); cursor: pointer; transition: var(--transition); }
         .import-export-btn:hover { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); transform: translateY(-2px); }
 
-        /* Excel Review Card Styles */
         .pending-import-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem; position: relative; }
         .pending-import-card h4 { margin-bottom: 0.75rem; color: var(--text-primary); font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem; }
         .pending-import-card p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem; display: flex; justify-content: space-between; }
@@ -166,6 +173,13 @@
         .pending-import-card .val-after { color: var(--success); font-weight: 600; }
         .btn-remove-pending { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
         .btn-remove-pending:hover { background: var(--danger); color: #fff; }
+
+        .badge-info { font-size: 0.75rem; background: var(--accent-glow); color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 12px; border: 1px solid var(--accent); }
+
+        /* Floating Action Button (FAB) */
+        .fab-button { position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #ffffff; border: none; box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4); display: flex; align-items: center; justify-content: center; z-index: 99; cursor: pointer; transition: var(--transition); }
+        .fab-button:hover { background: var(--accent-hover); transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 28px rgba(249, 115, 22, 0.6); }
+        .fab-button svg { width: 24px; height: 24px; }
     </style>
 </head>
 <body>
@@ -205,7 +219,10 @@
     <div class="input-panel">
         <h2>
             <span>Log New Session(s)</span>
-            <span id="syncIndicator" class="sync-status sync-offline" onclick="connectLiveSync()" title="Click to connect save path">🔴 Unsaved: Click to Set Save Path</span>
+            <div class="sync-status-group">
+                <span id="firebaseStatusIndicator" class="sync-status sync-offline" onclick="showFirebaseModal()" title="Click to configure Firebase Cloud Database">🔥 Firebase: Disconnected</span>
+                <span id="syncIndicator" class="sync-status sync-offline" onclick="connectLiveSync()" title="Click to set local file save path">📁 File Save: Set Path</span>
+            </div>
         </h2>
         <div class="input-grid">
             <div class="input-group">
@@ -237,15 +254,14 @@
         <button class="tab-btn" id="btn-payment" onclick="switchView('payment')">Payment Details</button>
         
         <!-- CONNECTION & MENU BUTTONS -->
-        <button class="tab-btn" id="btnConnect" style="margin-left: auto; color: var(--accent); border-color: var(--accent);" onclick="connectLiveSync()">📁 Set Save Path</button>
+        <button class="tab-btn" id="btnFirebase" style="margin-left: auto; color: #ffca28; border-color: rgba(255, 202, 40, 0.4);" onclick="showFirebaseModal()">🔥 Firebase DB</button>
+        <button class="tab-btn" id="btnConnect" style="color: var(--accent); border-color: var(--accent);" onclick="connectLiveSync()">📁 Set Save Path</button>
         <button class="tab-btn" onclick="showImportModal()">⬆ Import</button>
         <button class="tab-btn" onclick="showExportModal()">⬇ Export</button>
 
         <!-- Hidden Inputs for Importing -->
         <input type="file" id="importJsonInput" style="display: none;" accept=".json,.txt" onchange="importJSON(event)">
         <input type="file" id="importCsvInput" style="display: none;" accept=".csv" onchange="importCSV(event)">
-        
-        <!-- NEW MULTI-EXCEL UPLOAD -->
         <input type="file" id="importExcelInput" style="display: none;" accept=".xlsx,.xls" multiple onchange="importProjectExcel(event)">
     </div>
 
@@ -291,6 +307,14 @@
     </div>
 </div>
 
+<!-- Floating Action Button (FAB) -->
+<button class="fab-button" onclick="document.getElementById('projectInput').focus(); window.scrollTo({top: 200, behavior: 'smooth'});" title="Quick Log Entry">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+</button>
+
 <div id="customModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header"><h3 class="modal-title" id="modalTitle">Title</h3></div>
@@ -300,8 +324,11 @@
 </div>
 
 <script>
-    let isAppEnabled = false; 
+    let isAppEnabled = true; 
     let fileHandle = null;
+    let db = null; // Firebase Firestore Instance
+    let firebaseUnsubscribe = null;
+
     let workData = JSON.parse(localStorage.getItem('annotationData')) || [];
     let endedProjects = JSON.parse(localStorage.getItem('endedProjectsData')) || {};
     let projectEarnings = JSON.parse(localStorage.getItem('projectEarningsData')) || {};
@@ -312,20 +339,9 @@
 
     let currentView = 'daily';
     let activeFilters = { projects: [], start: '', end: '' };
-    
-    // Memory to hold Excel imports before user confirms
     let pendingExcelImports = [];
 
-    function toggleApp(enable) {
-        isAppEnabled = enable;
-        const elements = document.querySelectorAll('input, select, button');
-        elements.forEach(el => {
-            if (el.id !== 'btnInitialConnect' && !el.classList.contains('btn-cancel') && !el.classList.contains('btn-remove-pending')) {
-                el.disabled = !enable;
-            }
-        });
-    }
-
+    // --- IndexedDB for Save Handle ---
     const dbPromise = new Promise((resolve, reject) => {
         const req = indexedDB.open('ARCDashboardDB', 1);
         req.onupgradeneeded = e => e.target.result.createObjectStore('settings');
@@ -338,22 +354,218 @@
     async function verifyFilePermission(handle) { if ((await handle.queryPermission({ mode: 'readwrite' })) === 'granted') return true; if ((await handle.requestPermission({ mode: 'readwrite' })) === 'granted') return true; return false; }
 
     window.addEventListener('DOMContentLoaded', async () => {
+        // Attempt to load local save handle
         const savedHandle = await getHandleFromDB();
         if (savedHandle) {
-            fileHandle = savedHandle; toggleApp(false);
-            const lockMessage = `<p>Welcome back! The dashboard remembers your save file: <strong style="color:var(--accent);">${fileHandle.name}</strong></p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">For security, your browser requires you to click the button below to re-grant write access and unlock the dashboard.</p>`;
-            openModal("🔒 Reconnect Save File", lockMessage, "custom");
-            document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">🔗 Reconnect File</button>`;
-            document.getElementById('customModal').onclick = null;
-        } else {
-            toggleApp(false);
-            const lockMessage = `<p>You must set a save location before using the dashboard. This ensures your work is always safely saved to your computer.</p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Click the button below to choose where to save your data file.</p>`;
-            openModal("🔒 Action Required", lockMessage, "custom");
-            document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">📁 Set Save Location</button>`;
-            document.getElementById('customModal').onclick = null; 
+            fileHandle = savedHandle;
+            try {
+                const hasPerm = await verifyFilePermission(fileHandle);
+                if (hasPerm) {
+                    document.getElementById('syncIndicator').className = "sync-status sync-online"; 
+                    document.getElementById('syncIndicator').innerHTML = `🟢 Synced to: ${fileHandle.name}`;
+                }
+            } catch(e){}
         }
+
+        // Initialize Firebase if user stored local credentials
+        initFirebaseFromStorage();
+
+        renderUI();
     });
 
+    // --- FIREBASE INTEGRATION ENGINE ---
+    function initFirebaseFromStorage() {
+        const storedConfigStr = localStorage.getItem('firebaseConfig');
+        if (!storedConfigStr) {
+            updateFirebaseStatus("offline", "🔥 Firebase: Disconnected");
+            return false;
+        }
+
+        try {
+            const config = JSON.parse(storedConfigStr);
+            if (!config.apiKey || !config.projectId) {
+                updateFirebaseStatus("offline", "🔥 Firebase: Invalid Config");
+                return false;
+            }
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(config);
+            }
+            db = firebase.firestore();
+            
+            updateFirebaseStatus("online", "🔥 Firebase: Connected");
+            listenToFirebaseRealtime();
+            return true;
+        } catch (err) {
+            console.error("Firebase init error:", err);
+            updateFirebaseStatus("offline", "🔥 Firebase: Error");
+            return false;
+        }
+    }
+
+    function updateFirebaseStatus(state, text) {
+        const ind = document.getElementById('firebaseStatusIndicator');
+        const btn = document.getElementById('btnFirebase');
+        if (!ind) return;
+
+        if (state === "online") {
+            ind.className = "sync-status sync-firebase";
+            ind.innerHTML = `🟢 ${text}`;
+            btn.style.borderColor = "var(--success)";
+            btn.style.color = "var(--success)";
+        } else if (state === "syncing") {
+            ind.className = "sync-status sync-reconnect";
+            ind.innerHTML = `⏳ Syncing...`;
+        } else {
+            ind.className = "sync-status sync-offline";
+            ind.innerHTML = `🔴 ${text}`;
+            btn.style.borderColor = "rgba(255, 202, 40, 0.4)";
+            btn.style.color = "#ffca28";
+        }
+    }
+
+    function listenToFirebaseRealtime() {
+        if (!db) return;
+        if (firebaseUnsubscribe) firebaseUnsubscribe();
+
+        firebaseUnsubscribe = db.collection('arc_dashboard').doc('main_data').onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                // Optionally auto-update local state if cloud data has changed
+                if (data.workData && JSON.stringify(data.workData) !== JSON.stringify(workData)) {
+                    workData = data.workData || [];
+                    endedProjects = data.endedProjects || {};
+                    projectEarnings = data.projectEarnings || {};
+                    projectBonuses = data.projectBonuses || {};
+                    hourlyRates = data.hourlyRates || {};
+                    cutoffPayments = data.cutoffPayments || [];
+                    manualTotalEarning = data.manualTotalEarning !== undefined ? data.manualTotalEarning : null;
+                    
+                    saveToLocalStorageOnly();
+                    renderUI();
+                }
+            }
+        }, (err) => {
+            console.warn("Firestore realtime listener error:", err);
+        });
+    }
+
+    async function pushDataToFirebase() {
+        if (!db) {
+            openModal("Firebase Not Configured", "Please set your Firebase Cloud Config first.", "alert");
+            return;
+        }
+        updateFirebaseStatus("syncing", "Uploading...");
+        try {
+            const payload = {
+                workData,
+                endedProjects,
+                projectEarnings,
+                projectBonuses,
+                hourlyRates,
+                cutoffPayments,
+                manualTotalEarning,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            await db.collection('arc_dashboard').doc('main_data').set(payload, { merge: true });
+            updateFirebaseStatus("online", "Firebase: Synced");
+            openModal("Firebase Push Successful", "All current local data and history successfully pushed to your Firebase Cloud Database!", "alert");
+        } catch (err) {
+            console.error(err);
+            updateFirebaseStatus("offline", "Firebase: Upload Failed");
+            openModal("Upload Error", "Failed to upload data to Firebase: " + err.message, "alert");
+        }
+    }
+
+    async function pullDataFromFirebase() {
+        if (!db) {
+            openModal("Firebase Not Configured", "Please set your Firebase Cloud Config first.", "alert");
+            return;
+        }
+        updateFirebaseStatus("syncing", "Fetching...");
+        try {
+            const doc = await db.collection('arc_dashboard').doc('main_data').get();
+            if (doc.exists) {
+                const data = doc.data();
+                workData = data.workData || [];
+                endedProjects = data.endedProjects || {};
+                projectEarnings = data.projectEarnings || {};
+                projectBonuses = data.projectBonuses || {};
+                hourlyRates = data.hourlyRates || {};
+                cutoffPayments = data.cutoffPayments || [];
+                manualTotalEarning = data.manualTotalEarning !== undefined ? data.manualTotalEarning : null;
+
+                saveAllData();
+                renderUI();
+                updateFirebaseStatus("online", "Firebase: Synced");
+                openModal("Data Pulled", "Your dashboard was updated with the latest data from Firebase cloud!", "alert");
+            } else {
+                openModal("Cloud Data Empty", "No document found in Firebase. Use 'Push Data to Cloud' to upload your local data.", "alert");
+                updateFirebaseStatus("online", "Firebase: Connected");
+            }
+        } catch (err) {
+            console.error(err);
+            updateFirebaseStatus("offline", "Firebase: Fetch Failed");
+            openModal("Download Error", "Failed to pull data from Firebase: " + err.message, "alert");
+        }
+    }
+
+    function showFirebaseModal() {
+        const savedConfig = localStorage.getItem('firebaseConfig') || '';
+        const html = `
+            <p style="margin-bottom: 0.8rem; font-size: 0.85rem; color: var(--text-secondary);">
+                Paste your Firebase Web App Config JSON below. This will be safely stored <strong>locally in your browser</strong> so your API keys will never leak on GitHub!
+            </p>
+            <div class="input-group">
+                <label>Firebase Configuration (JSON format)</label>
+                <textarea id="firebaseConfigJson" placeholder='{\n  "apiKey": "AIzaSy...",\n  "authDomain": "...",\n  "projectId": "...",\n  "storageBucket": "...",\n  "messagingSenderId": "...",\n  "appId": "..."\n}'></textarea>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+                <button class="import-export-btn" style="flex: 1;" onclick="saveFirebaseConfig()">💾 Save Config</button>
+                <button class="import-export-btn" style="flex: 1; border-color: var(--danger); color: var(--danger);" onclick="clearFirebaseConfig()">🗑 Clear Config</button>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 1rem 0;">
+            <p style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem;">Cloud Database Actions</p>
+            <button class="import-export-btn" style="border-color: var(--accent); color: var(--accent);" onclick="pushDataToFirebase()">⬆ Push Local Data to Firebase Cloud</button>
+            <button class="import-export-btn" style="border-color: var(--bonus); color: var(--bonus);" onclick="pullDataFromFirebase()">⬇ Pull Data from Firebase Cloud</button>
+        `;
+
+        openModal("🔥 Firebase Cloud Database Config", html, "custom");
+        document.getElementById('modalActions').innerHTML = `<button class="btn-cancel" onclick="closeModal()">Close</button>`;
+
+        if (savedConfig) {
+            try {
+                document.getElementById('firebaseConfigJson').value = JSON.stringify(JSON.parse(savedConfig), null, 2);
+            } catch(e) {
+                document.getElementById('firebaseConfigJson').value = savedConfig;
+            }
+        }
+    }
+
+    function saveFirebaseConfig() {
+        const raw = document.getElementById('firebaseConfigJson').value.trim();
+        if (!raw) return openModal("Invalid Input", "Please enter valid configuration JSON.", "alert");
+        
+        try {
+            let parsed = JSON.parse(raw);
+            localStorage.setItem('firebaseConfig', JSON.stringify(parsed));
+            if (initFirebaseFromStorage()) {
+                openModal("Connected!", "Firebase Cloud config saved locally! You can now sync your data anytime.", "alert");
+            }
+        } catch(e) {
+            openModal("JSON Parsing Error", "Please ensure your Firebase Config is valid JSON object format.", "alert");
+        }
+    }
+
+    function clearFirebaseConfig() {
+        localStorage.removeItem('firebaseConfig');
+        if (firebaseUnsubscribe) firebaseUnsubscribe();
+        db = null;
+        updateFirebaseStatus("offline", "🔥 Firebase: Disconnected");
+        openModal("Config Removed", "Firebase config removed from local browser memory.", "alert");
+    }
+
+    // --- LOCAL FILE SYNC LOGIC ---
     async function changeSavePath() { fileHandle = null; connectLiveSync(); }
 
     async function connectLiveSync() {
@@ -364,11 +576,9 @@
                     if (!hasPerm) {
                         fileHandle = null; 
                     } else {
-                        // Force check if the file still exists on the hard drive
                         await fileHandle.getFile();
                     }
                 } catch (e) {
-                    // This catches if the file was deleted manually by the user
                     fileHandle = null; 
                 }
             }
@@ -389,11 +599,9 @@
                 }
             } catch (e) { }
 
-            document.getElementById('syncIndicator').className = "sync-status sync-online"; document.getElementById('syncIndicator').innerHTML = `🟢 Synced to: ${fileHandle.name}`;
+            document.getElementById('syncIndicator').className = "sync-status sync-online"; 
+            document.getElementById('syncIndicator').innerHTML = `🟢 Synced to: ${fileHandle.name}`;
             const btn = document.getElementById('btnConnect'); btn.innerHTML = `📁 Change Save Path`; btn.onclick = changeSavePath; 
-            
-            toggleApp(true); 
-            document.getElementById('customModal').onclick = function(e) { if (e.target === this) closeModal(); };
             
             saveAllData(); renderUI();
             
@@ -401,20 +609,24 @@
             openModal("Sync Active", `Dashboard unlocked! Data is now actively saving to <strong>${fileHandle.name}</strong>.`, "alert");
 
         } catch (err) {
-            fileHandle = null; // Ensure the loop is broken if they cancel
-            if (!isAppEnabled) {
-                const lockMessage = `<p style="color: var(--danger);">You must set a save location to use the dashboard.</p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Click below to try again.</p>`;
-                openModal("🔒 Action Required", lockMessage, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">📁 Try Again</button>`;
-            }
+            fileHandle = null;
         }
     }
 
-    async function saveAllData() {
-        if (!isAppEnabled) return; 
-        
-        localStorage.setItem('annotationData', JSON.stringify(workData)); localStorage.setItem('endedProjectsData', JSON.stringify(endedProjects)); localStorage.setItem('projectEarningsData', JSON.stringify(projectEarnings)); localStorage.setItem('projectBonusesData', JSON.stringify(projectBonuses)); localStorage.setItem('hourlyRatesData', JSON.stringify(hourlyRates)); localStorage.setItem('cutoffPaymentsData', JSON.stringify(cutoffPayments));
+    function saveToLocalStorageOnly() {
+        localStorage.setItem('annotationData', JSON.stringify(workData)); 
+        localStorage.setItem('endedProjectsData', JSON.stringify(endedProjects)); 
+        localStorage.setItem('projectEarningsData', JSON.stringify(projectEarnings)); 
+        localStorage.setItem('projectBonusesData', JSON.stringify(projectBonuses)); 
+        localStorage.setItem('hourlyRatesData', JSON.stringify(hourlyRates)); 
+        localStorage.setItem('cutoffPaymentsData', JSON.stringify(cutoffPayments));
         if (manualTotalEarning !== null) localStorage.setItem('manualTotalEarningData', manualTotalEarning); else localStorage.removeItem('manualTotalEarningData');
+    }
 
+    async function saveAllData() {
+        saveToLocalStorageOnly();
+
+        // 1. Save to File Handle if available
         if (fileHandle) {
             try {
                 const fullBackup = { workData, endedProjects, projectEarnings, projectBonuses, hourlyRates, cutoffPayments, manualTotalEarning };
@@ -422,13 +634,28 @@
                 await writable.write(JSON.stringify(fullBackup, null, 2));
                 await writable.close();
             } catch (err) {
-                document.getElementById('syncIndicator').className = "sync-status sync-offline"; document.getElementById('syncIndicator').innerHTML = "🔴 Connection Lost";
-                const btn = document.getElementById('btnConnect'); btn.innerHTML = `🔗 Reconnect Save File`; btn.onclick = connectLiveSync;
-                
-                toggleApp(false); 
-                const lockMessage = `<p style="color: var(--danger);">The connection to your backup file was lost!</p><p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">The file may have been moved or deleted. Please reconnect to resume working.</p>`;
-                openModal("🔒 Connection Lost", lockMessage, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-submit" id="btnInitialConnect" onclick="connectLiveSync()" style="width:100%;">🔗 Reconnect File</button>`; document.getElementById('customModal').onclick = null;
+                document.getElementById('syncIndicator').className = "sync-status sync-offline"; 
+                document.getElementById('syncIndicator').innerHTML = "🔴 Connection Lost";
                 fileHandle = null;
+            }
+        }
+
+        // 2. Auto sync to Firebase if available
+        if (db) {
+            try {
+                const payload = {
+                    workData,
+                    endedProjects,
+                    projectEarnings,
+                    projectBonuses,
+                    hourlyRates,
+                    cutoffPayments,
+                    manualTotalEarning,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                await db.collection('arc_dashboard').doc('main_data').set(payload, { merge: true });
+            } catch(e) {
+                console.warn("Background Firebase auto-sync notice:", e);
             }
         }
     }
@@ -452,12 +679,12 @@
         openModal("Import Data", content, "custom"); document.getElementById('modalActions').innerHTML = `<button class="btn-cancel" onclick="closeModal()">Cancel</button>`;
     }
 
-    // --- NEW EXCEL STAGING & REVIEW ENGINE ---
+    // --- MULTI-EXCEL UPLOAD ENGINE ---
     async function importProjectExcel(event) {
         const files = event.target.files;
         if (!files || files.length === 0) return;
 
-        pendingExcelImports = []; // Reset staging array
+        pendingExcelImports = [];
 
         const processFile = (file) => {
             return new Promise((resolve) => {
@@ -477,7 +704,7 @@
                             
                             if(row) {
                                 pendingExcelImports.push({
-                                    id: Date.now() + Math.random().toString(36).substr(2, 9), // Unique ID for deletion
+                                    id: Date.now() + Math.random().toString(36).substr(2, 9),
                                     fileName: file.name,
                                     projectId: projectId,
                                     personalPayment: parseFloat(row.payment_personal) || 0,
@@ -499,7 +726,7 @@
             await processFile(files[i]);
         }
 
-        event.target.value = ''; // Reset input so you can select the same files again if needed
+        event.target.value = '';
         
         if (pendingExcelImports.length > 0) {
             renderImportConfirmation();
@@ -524,7 +751,7 @@
             const newBon = curBon + item.bonus;
             
             const curRate = hourlyRates[item.projectId] || 0;
-            const newRate = item.rate > 0 ? item.rate : curRate; // Replaces rate, does not add
+            const newRate = item.rate > 0 ? item.rate : curRate;
 
             html += `
             <div class="pending-import-card">
@@ -551,20 +778,19 @@
 
     function removePendingImport(id) {
         pendingExcelImports = pendingExcelImports.filter(item => item.id !== id);
-        renderImportConfirmation(); // Re-render the popup instantly
+        renderImportConfirmation();
     }
 
     function confirmExcelImport() {
         let processedCount = pendingExcelImports.length;
         
-        // Loop through the accepted staging items and apply them to the master data
         pendingExcelImports.forEach(item => {
             projectEarnings[item.projectId] = (projectEarnings[item.projectId] || 0) + item.personalPayment;
             projectBonuses[item.projectId] = (projectBonuses[item.projectId] || 0) + item.bonus;
             if (item.rate > 0) hourlyRates[item.projectId] = item.rate;
         });
         
-        pendingExcelImports = []; // Clear staging
+        pendingExcelImports = [];
         saveAllData(); 
         renderUI();
         
@@ -635,13 +861,12 @@
                     totalHoursSum += row.hours; const originalIndex = workData.indexOf(row); let tr = '<tr>';
                     if (index === 0) tr += `<td rowspan="${dailyEntries.length}" class="merged-cell">${formattedDate}</td>`;
                     
-                    // Hover Tooltip logic for daily view
                     const rate = hourlyRates[row.project];
                     const rateStr = rate !== undefined ? `₱${rate.toFixed(2)}/hr` : "Not Set";
                     tr += `<td><span class="project-tag" title="Hourly Rate: ${rateStr}">${row.project}</span></td><td class="number-cell">${formatHoursMinutes(row.hours)}</td><td class="number-cell">${row.maps}</td>`;
                     
                     if (index === 0) tr += `<td rowspan="${dailyEntries.length}" class="merged-cell number-cell total-time-text" style="cursor: pointer;" onclick="triggerEditDailyTotal('${dateStr}', ${totalDailyHours})">${formatHoursMinutes(totalDailyHours)}</td>`;
-                    tr += `<td class="action-cell"><button class="btn-icon" onclick="triggerEdit(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button><button class="btn-icon delete" onclick="triggerDelete(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`;
+                    tr += `<td class="action-cell"><button class="btn-icon" onclick="triggerEdit(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button><button class="btn-icon delete" onclick="triggerDelete(${originalIndex})"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v2"></path></svg></button></td></tr>`;
                     tbody.innerHTML += tr;
                 });
             });
@@ -654,7 +879,6 @@
                 const isEnded = endedProjects[proj.project]?.isEnded; const formattedStartDate = new Date(proj.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                 const rate = hourlyRates[proj.project]; let projEarning = projectEarnings[proj.project] !== undefined ? projectEarnings[proj.project] : (rate !== undefined ? proj.hours * rate : 0); const projBonus = projectBonuses[proj.project] || 0; const earningVal = `₱${projEarning.toFixed(2)}${projBonus > 0 ? ` <span style="font-size: 0.8rem; color: var(--bonus); font-weight: 500;">(+ ₱${projBonus.toFixed(2)} bonus)</span>` : ''}`;
                 
-                // Hover Tooltip logic for project view
                 const rateStr = rate !== undefined ? `₱${rate.toFixed(2)}/hr` : "Not Set";
                 let projectTagHtml = isEnded ? `<span class="project-tag clickable" onclick="triggerHourlyRate('${proj.project}')" title="Hourly Rate: ${rateStr} (Click to Edit)">${proj.project}</span>` : `<span class="project-tag" title="Hourly Rate: ${rateStr}">${proj.project}</span>`;
                 
